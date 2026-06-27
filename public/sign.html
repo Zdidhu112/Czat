@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign</title>
+    <link rel="stylesheet" href="./css/login.css">
+</head>
+<body>
+    <div class="logo"><a href="/">APP</a></div>
+    <div class="formContainer">
+        <form action="/register" method="post">
+            <h3>Rejestracja</h3>
+            <div class="inputBox">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" placeholder="Wpisz adres email" required>
+            </div>
+            <div class="inputBox">
+                <label for="username">Nazwa użytkownika</label>
+                <input type="username" name="username" id="username" placeholder="Wpisz nazwę użytkownika" required>
+            </div>
+            <div class="inputBox">
+                <label for="password">Hasło</label>
+                <input type="password" name="password" id="password" placeholder="Wpisz hasło" required>
+            </div>
+            <button type="submit">Zarejestruj się</button>
+            <p class="separator">
+                <span>lub</span>
+            </p>
+            <div class="loginOption">
+                <a href="/login/google">
+                    <img src="./img/google_logo.png" alt="Google logo">
+                    <span>Zarejestruj się z Google</span>
+                </a>
+            </div>
+            <p class="toSign">Masz już konto? <a href="/login">Zaloguj się</a></p>
+        </form>
+    </div>
+</body>
+</html>
