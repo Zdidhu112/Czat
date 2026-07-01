@@ -209,21 +209,21 @@ async function loadUsers() {
 if (roomType.value === "private") {
         usersDiv.style.display = "block";
         userSearchInput.disabled = false;
-        userSearchInput.placeholder = "Publiczny czat jest dostępny dla wszystkich";
+        userSearchInput.placeholder = "Wyszukaj użytkownika";
     } else {
         usersDiv.style.display = "none";
         userSearchInput.disabled = true;
-        userSearchInput.placeholder = "Wyszukaj użytkownika";
+        userSearchInput.placeholder = "Publiczny czat jest dostępny dla wszystkich";
     }
 roomType.onchange = () => {
     if (roomType.value === "private") {
         usersDiv.style.display = "block";
         userSearchInput.disabled = false;
-        userSearchInput.placeholder = "Publiczny czat jest dostępny dla wszystkich";
+        userSearchInput.placeholder = "Wyszukaj użytkownika";
     } else {
         usersDiv.style.display = "none";
         userSearchInput.disabled = true;
-        userSearchInput.placeholder = "Wyszukaj użytkownika";
+        userSearchInput.placeholder = "Publiczny czat jest dostępny dla wszystkich";
     }
 }
 saveRoom.onclick = async () => {
