@@ -31,12 +31,13 @@ body{
     height:100vh;
     display:flex;
     font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
-    background:var(--bg);
+    background: var(--bg);
 }
 
 .container{
     display:flex;
     width:100%;
+    background-color: var(--bg);
 }
 
 button{
@@ -340,6 +341,7 @@ ul{
     justify-content:space-between;
     align-items:center;
     padding:8px 24px;
+    background:var(--white);
     border-bottom:2px solid var(--gray-200);
 }
 
