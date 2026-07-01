@@ -168,4 +168,4 @@ function initialize(passport, getUserByEmail, getUserById) {
 }
 
 
-module.exports = initializec
+module.exports = initialize
