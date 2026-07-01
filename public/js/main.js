@@ -18,6 +18,8 @@ const roomType = document.querySelector("#roomType");
 const roomNameInput = document.querySelector("#roomName");
 const saveRoom = document.querySelector("#createRoom");
 const userSearchInput = document.querySelector("#userSearchInput");
+const emojiPickerBtn = document.querySelector("#emojiPickerBtn");
+const emojiPicker = document.querySelector(".emojiPicker");
 const { room } = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
@@ -37,11 +39,11 @@ socket.on("id", id => {
     myId = id;
 
 })
-socket.on("roomUsers", ({ users, name,}) => {
-    if(name) {
-    roomName.textContent = name;
-    roomName2.textContent = name;
-}
+socket.on("roomUsers", ({ users, name, }) => {
+    if (name) {
+        roomName.textContent = name;
+        roomName2.textContent = name;
+    }
     renderUsers(users);
 });
 
@@ -286,4 +288,18 @@ modalClose.addEventListener("click", (e) => {
 })
 userSearchInput.addEventListener("input", (e) => {
     roomSearch(userSearchInput, usersDiv, "label span");
+})
+emojiPickerBtn.addEventListener("click", (e) => {
+    if (emojiPicker.classList.contains("hidden")) {
+        emojiPicker.classList.remove("hidden");
+    } else {
+        emojiPicker.classList.add("hidden");
+    }
+})
+emojiPicker.addEventListener("click", (e) => {
+    if (e.target.tagName === "LI") {
+        chatInput.value = chatInput.value.slice(0, chatInput.selectionStart) + e.target.textContent + chatInput.value.slice(chatInput.selectionStart);
+        emojiPicker.classList.toggle("hidden");
+
+    }
 })
