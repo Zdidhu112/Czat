@@ -39,6 +39,7 @@ module.exports = function (io) {
 
             socket.join(user.room);
             const messages = await getMessages(user.room);
+            socket.emit("id", userId);
             socket.emit("chatHistory", messages);
 
             socket.emit(
@@ -50,7 +51,6 @@ module.exports = function (io) {
                 room: room._id,
                 name: room.name,
                 users: getRoomUsers(user.room),
-                userId: userId
             });
 
             socket.broadcast

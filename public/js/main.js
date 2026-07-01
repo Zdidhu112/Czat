@@ -27,21 +27,26 @@ const socket = io();
 let myId;
 loadRooms();
 loadUsers();
-if(roomId){
-socket.emit("joinRoom", roomId);
+if (roomId) {
+    socket.emit("joinRoom", roomId);
 } else {
     roomName.textContent = "Wybierz czat";
     roomName2.textContent = "Wybierz czat";
 }
-socket.on("roomUsers", ({ users, name, userId }) => {
-    myId = userId;
+socket.on("id", id => {
+    myId = id;
+
+})
+socket.on("roomUsers", ({ users, name,}) => {
+    if(name) {
     roomName.textContent = name;
     roomName2.textContent = name;
-    
+}
     renderUsers(users);
 });
 
 socket.on("chatHistory", messages => {
+    chatMessages.innerHTML = "";
     messages.forEach(renderMessage);
     scrollToBottom();
 });
@@ -65,7 +70,7 @@ function renderMessage(message) {
     const wrapper = document.createElement("div");
     wrapper.classList.add("message");
 
-    if (message.id === myId) {
+    if (message.user === myId) {
         wrapper.classList.add("my");
     }
 
@@ -135,7 +140,7 @@ async function loadRooms() {
         rooms.forEach(room => {
             const li = document.createElement("li");
             li.className = "el";
-            if(room._id == roomId) li.classList.add("actual");
+            if (room._id == roomId) li.classList.add("actual");
             li.dataset.id = room._id;
 
             const icon = document.createElement("div");
@@ -169,10 +174,10 @@ async function loadRooms() {
             li.addEventListener("click", () => {
                 window.location.href = "/chat?room=" + room._id;
             });
-            if(room.type === 'public') {
-              chatListPublic.appendChild(li);
+            if (room.type === 'public') {
+                chatListPublic.appendChild(li);
             } else {
-              chatListPrivate.appendChild(li);
+                chatListPrivate.appendChild(li);
 
             }
         });
@@ -185,77 +190,82 @@ async function loadUsers() {
     const users = await fetch("/rooms/api/users")
         .then(res => res.json());
     users.forEach(user => {
-        usersDiv.innerHTML += `
-        <label>
-        <input
-        type="checkbox" value="${user._id}">
-        <span>${user.name}</span>
-        </label>
-        `;
+        const label = document.createElement("label");
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = user._id;
+
+        const span = document.createElement("span");
+        span.textContent = user.name;
+
+        label.append(input, span);
+
+        usersDiv.append(label);
     });
 }
-roomType.onchange=()=>{
-    usersDiv.style.display=
-        roomType.value==="private" ?"block":"none";
+roomType.onchange = () => {
+    usersDiv.style.display =
+        roomType.value === "private" ? "block" : "none";
 }
-saveRoom.onclick=async()=>{
-    const members=[
+saveRoom.onclick = async () => {
+    const members = [
         ...document.querySelectorAll(
             "#users input:checked"
         )
-    ].map(x=>x.value);
+    ].map(x => x.value);
     console.log(members);
-    
-    const res = await fetch("/rooms/api",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
+
+    const res = await fetch("/rooms/api", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
         },
-        body:JSON.stringify({
+        body: JSON.stringify({
             name: roomNameInput.value,
-            type:roomType.value,
+            type: roomType.value,
             members
         })
     });
     console.log(res);
     const room = await res.json();
     console.log(room);
-    if(!room._id) return;
+    if (!room._id) return;
     window.location.href = "/chat?room=" + room._id;
 }
-listShowPrivate.addEventListener("click", (e)=>{
-  if(listShowPrivate.classList.contains("active")) {
-    listShowPrivate.classList.remove("active");
-    listShowPublic.classList.add("active");
-    chatListPrivate.style.display = 'none';
-    chatListPublic.style.display = 'flex';
-  } else {
-    listShowPublic.classList.remove("active");
-    listShowPrivate.classList.add("active");
-    chatListPublic.style.display = 'none';
-    chatListPrivate.style.display = 'flex';
-  }
-}) 
-listShowPublic.addEventListener("click", (e)=>{
-  if(listShowPrivate.classList.contains("active")) {
-    listShowPrivate.classList.remove("active");
-    listShowPublic.classList.add("active");
-    chatListPrivate.style.display = 'none';
-    chatListPublic.style.display = 'flex';
-  } else {
-    listShowPublic.classList.remove("active");
-    listShowPrivate.classList.add("active");
-    chatListPublic.style.display = 'none';
-    chatListPrivate.style.display = 'flex';
-  }
+listShowPrivate.addEventListener("click", (e) => {
+    if (listShowPrivate.classList.contains("active")) {
+        listShowPrivate.classList.remove("active");
+        listShowPublic.classList.add("active");
+        chatListPrivate.style.display = 'none';
+        chatListPublic.style.display = 'flex';
+    } else {
+        listShowPublic.classList.remove("active");
+        listShowPrivate.classList.add("active");
+        chatListPublic.style.display = 'none';
+        chatListPrivate.style.display = 'flex';
+    }
+})
+listShowPublic.addEventListener("click", (e) => {
+    if (listShowPrivate.classList.contains("active")) {
+        listShowPrivate.classList.remove("active");
+        listShowPublic.classList.add("active");
+        chatListPrivate.style.display = 'none';
+        chatListPublic.style.display = 'flex';
+    } else {
+        listShowPublic.classList.remove("active");
+        listShowPrivate.classList.add("active");
+        chatListPublic.style.display = 'none';
+        chatListPrivate.style.display = 'flex';
+    }
 })
 console.log(roomSearchInput);
 
-roomSearchInput.addEventListener("input", (e)=>{
-  roomSearch(roomSearchInput, chatListPrivate, ".chatName");
-  roomSearch(roomSearchInput, chatListPublic, ".chatName");
+roomSearchInput.addEventListener("input", (e) => {
+    roomSearch(roomSearchInput, chatListPrivate, ".chatName");
+    roomSearch(roomSearchInput, chatListPublic, ".chatName");
 })
-function roomSearch(inp, list, nameBox ) {
+function roomSearch(inp, list, nameBox) {
     const value = inp.value.trim().toUpperCase();
 
     [...list.children].forEach(el => {
@@ -263,17 +273,17 @@ function roomSearch(inp, list, nameBox ) {
         el.style.display = name.includes(value) ? "" : "none";
     });
 }
-showModalBtn.addEventListener("click", (e)=> {
+showModalBtn.addEventListener("click", (e) => {
     modalBox.style.display = "flex";
 })
-modalBox.addEventListener("click", (e)=>{
-    if(!e.target.closest(".modal")) {
+modalBox.addEventListener("click", (e) => {
+    if (!e.target.closest(".modal")) {
         modalBox.style.display = "none";
     }
 })
-modalClose.addEventListener("click", (e)=>{
+modalClose.addEventListener("click", (e) => {
     modalBox.style.display = "none";
 })
-userSearchInput.addEventListener("input", (e)=>{
-  roomSearch(userSearchInput, usersDiv, "label span");
+userSearchInput.addEventListener("input", (e) => {
+    roomSearch(userSearchInput, usersDiv, "label span");
 })
