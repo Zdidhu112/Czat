@@ -1,52 +1,173 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
-      integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk="
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="css/style.css" />
-    <title>Chat App</title>
-  </head>
-  <body>
-    <div class="chat-container">
-      <header class="chat-header">
-        <h1><i class="fas fa-smile"></i> Chat</h1>
-        <a id="leave-btn" class="btn" href="/">Leave Room</a>
-      </header>
-      <main class="chat-main">
-        <div class="chat-sidebar">
-          <h3><i class="fas fa-comments"></i> Room Name:</h3>
-          <h2 id="room-name"></h2>
-          <h3><i class="fas fa-users"></i> Users</h3>
-          <ul id="users"></ul>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Czat</title>
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+
+    <link rel="stylesheet" href="./css/chat.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <nav class="nav">
+            <div>
+                <div class="logo">A</div>
+                <div class="separator"></div>
+
+                <div class="navList">
+                    <a class="navEl" href="#"><span class="material-symbols-outlined">home</span></a>
+                    <a class="navEl" href="#"><span class="material-symbols-outlined">chat</span></a>
+                    <a class="navEl" href="#"><span class="material-symbols-outlined">group</span></a>
+                </div>
+            </div>
+
+            <div class="navList2">
+                <div class="separator"></div>
+                <a class="navEl" href="/logout"><span class="material-symbols-outlined">logout</span></a>
+            </div>
+        </nav>
+
+        <aside class="leftSidebar">
+
+            <header>
+                <span class="heading">Czaty</span>
+
+                <div class="btnCon">
+                    <span class="material-symbols-outlined">more_horiz</span>
+                    <span class="material-symbols-outlined" id="addChat">chat_add_on</span>
+                </div>
+            </header>
+
+            <div class="inputDiv">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" placeholder="Wyszukaj czat" id="roomSearchInput">
+            </div>
+
+            <div class="typeDiv">
+                <button class="active" id="listShowPrivate">Prywatne</button>
+                <button class="" id="listShowPublic">Publiczne</button>
+            </div>
+
+            <ul class="chatList private">
+
+            </ul>
+            <ul class="chatList public">
+
+            </ul>
+
+        </aside>
+
+        <main class="main">
+
+            <header>
+                <div class="chatNameBox">
+                    <div class="icon"><span class="material-symbols-outlined">face</span></div>
+                    <div class="chatName">Grupa przestępcza</div>
+                </div>
+
+                <div class="chatActions">
+                    <span class="material-symbols-outlined">call</span>
+                    <span class="material-symbols-outlined">videocam</span>
+                    <span class="material-symbols-outlined">info</span>
+                </div>
+            </header>
+
+            <div class="messagesBox">
+
+            </div>
+
+            <div class="msgInputDiv">
+                <span class="material-symbols-outlined">mood</span>
+                <input type="text" placeholder="Aa">
+            </div>
+
+        </main>
+
+        <aside class="rightSidebar">
+
+            <div class="infoBox">
+                <div class="chatLogo">
+                    <span class="material-symbols-outlined">face</span>
+                </div>
+
+                <div class="chatName">Pies Wison</div>
+
+                <div class="chatBtns">
+                    <div class="el">
+                        <span class="material-symbols-outlined chatBtns icon">search</span>
+                        <span>Szukaj</span>
+                    </div>
+
+                    <div class="el">
+                        <span class="material-symbols-outlined chatBtns icon">group</span>
+                        <span>Członkowie</span>
+                    </div>
+
+                    <div class="el">
+                        <span class="material-symbols-outlined chatBtns icon">settings</span>
+                        <span>Ustawienia</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="activeBox">
+
+                <div class="activeInfo">
+                    <span class="dot">●</span>
+                    <span><span></span> online</span>
+                </div>
+
+                <ul>
+                </ul>
+
+            </div>
+
+        </aside>
+
+    </div>
+      <div class="modalBox">
+        <div class="modal">
+            <div class="createRoom">
+                <header>
+                    <span>Utwórz czat</span>
+                    <button class="material-symbols-outlined closeModal">close</button>
+                </header>
+                <label for="n">Nazwa Czatu</label>
+                <input id="roomName" name="n" placeholder="Wpisz nazwę">
+                <label for="n">Typ Czatu</label>
+                <select id="roomType" name="t">
+                    <option value="public">
+                        Publiczny
+                    </option>
+                    <option value="private">
+                        Prywatny
+                    </option>
+                </select>
+                <label for="s">Wybierz użytkowników</label>
+                <div class="inputDiv">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" placeholder="Wyszukaj użytkownika" id="userSearchInput" name="s">
+                </div>
+                <div id="users">
+                </div>
+                <button id="createRoom" type="submit">
+                    Utwórz
+                </button>
+            </div>
         </div>
-        <div class="chat-messages"></div>
-      </main>
-      <div class="chat-form-container">
-        <form id="chat-form">
-          <input
-            id="msg"
-            type="text"
-            placeholder="Enter Message"
-            required
-            autocomplete="off"
-          />
-          <button class="btn"><i class="fas fa-paper-plane"></i> Send</button>
-        </form>
-      </div>
     </div>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.2/qs.min.js"
-      integrity="sha256-TDxXjkAUay70ae/QJBEpGKkpVslXaHHayklIVglFRT4="
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.2/qs.min.js"
+        integrity="sha256-TDxXjkAUay70ae/QJBEpGKkpVslXaHHayklIVglFRT4=" crossorigin="anonymous"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./js/main.js"></script>
-  </body>
+
+</body>
+
 </html>

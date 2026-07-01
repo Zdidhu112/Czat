@@ -12,20 +12,24 @@ username: {
     },
 
     room: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Room",
         required: true
     },
 
     text: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        maxlength: 500
     },
     time: {
       type: String,
       required: true
     }
 
+}, {
+    timestamps: true
 });
 
 

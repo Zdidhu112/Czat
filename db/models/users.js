@@ -20,6 +20,9 @@ const userSchema = new mongoose.Schema({
           googleId:{
             type: String
           },
+          githubId:{
+            type: String
+          },
           picture:{
             type: String,
             required: true,

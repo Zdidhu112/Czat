@@ -7,32 +7,44 @@ const path = require('path');
 const http = require('http');
 const socketio = require('socket.io');
 const session = require("express-session");
+const flash = require("express-flash");
 const passport = require("passport");
-const cors = require("cors");
 
 const formatMessage = require('./utils/messages');
 const {userJoin, getCurrentUser, userLeave, getRoomUsers} = require('./utils/users');
+const {createUser, findUserByEmail, findUserById, findUsersAll} = require("./controller/actions");
+
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
 require('./db/mongoose');
+app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({extend: true}))
-app.use(cors());
+app.use(express.urlencoded({extended: true}));
+app.use(express.json());
 
 
 const sessionMiddleware = session(
   {
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+//     cookie:{
+//     httpOnly:true,
+//     secure:process.env.NODE_ENV==="production",
+//     sameSite: "none"
+// }
   }
 )
 app.use(sessionMiddleware);
+const initializePassport = require("./passport-config");
+initializePassport(passport, 
+    email => findUserByEmail(email),
+    id => findUserById(id),
+);
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use('/', require('./routes/root'));
 
 
@@ -46,7 +58,7 @@ app.all('/*split', (req, res) => {
         res.type('txt').send("404 Not Found");
     }
 });
-const botName = "Bocik";
+
 function onlyForHandshake(middleware) {
   return (req, res, next) => {
     const isHandshake = req._query.sid === undefined;

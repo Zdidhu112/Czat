@@ -1,13 +1,8 @@
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
-
-
 const LocalStrategy = require("passport-local").Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
 const bcrypt = require("bcryptjs");
 const User = require('./db/models/users');
-const { createUser } = require("./controller/actions");
 
 function initialize(passport, getUserByEmail, getUserById) {
   const authenticateUser = async (email, password, done) => {
@@ -28,31 +23,136 @@ function initialize(passport, getUserByEmail, getUserById) {
     }
   }
 
-  const authenticateUserGoogle = async (accessToken, refreshToken, profile, done) => {
-    console.log("auth")
-    console.log(profile)
+  const authenticateUserGoogle = async (
+    accessToken,
+    refreshToken,
+    profile,
+    done
+  ) => {
     try {
-      let user = await User.findOne({ googleId: profile.id })
-      console.log(user);
-      if (user) {
-        return done(null, user)
-      } else {
-        user = await User.create({
-          googleId: profile.id,
-          name: profile.displayName,
-          email: profile.emails[0].value,
-          picture: profile.photos?.[0]?.value
+
+      const email = profile.emails?.[0]?.value;
+
+      if (!email) {
+        return done(null, false, {
+          message: "Google account has no email."
         });
-
-        console.log(user);
-        return done(null, user);
-
       }
-    } catch (e) {
-      console.log(e);
-      return done(e)
+
+      let user = await User.findOne({
+        googleId: profile.id
+      });
+
+      if (user) {
+        return done(null, user);
+      }
+
+      user = await User.findOne({
+        email: email
+      });
+
+      if (user) {
+        user.googleId = profile.id;
+
+        if (!user.picture && profile.photos?.length) {
+          user.picture = profile.photos[0].value;
+        }
+
+        await user.save();
+
+        return done(null, user);
+      }
+
+      user = await User.create({
+        googleId: profile.id,
+        name: profile.displayName,
+        email: email,
+        picture: profile.photos?.[0]?.value
+      });
+
+      return done(null, user);
+
+    } catch (err) {
+      return done(err);
     }
-  }
+  };
+  const authenticateUserGitHub = async (
+    accessToken,
+    refreshToken,
+    profile,
+    done
+  ) => {
+    try {
+      console.log(profile);
+      console.log(JSON.stringify(profile, null, 2));
+      let email = profile.emails?.[0]?.value;
+
+      if (!email) {
+
+            const response = await fetch("https://api.github.com/user/emails", {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    Accept: "application/vnd.github+json"
+                }
+            });
+
+            const emails = await response.json();
+
+            const primary = emails.find(e => e.primary && e.verified);
+
+            if (primary) {
+                email = primary.email;
+            }
+        }
+        console.log(email);
+
+        if (!email) {
+            return done(null, false, {
+                message: "Nie udało się pobrać adresu e-mail z GitHuba."
+            });
+        }
+
+      // Szukamy użytkownika po githubId
+      let user = await User.findOne({
+        githubId: profile.id
+      });
+
+      if (user) {
+        return done(null, user);
+      }
+
+      // Jeśli nie ma githubId, szukamy po e-mailu
+      user = await User.findOne({
+        email: email
+      });
+
+      if (user) {
+        user.githubId = profile.id;
+
+        if (!user.picture && profile.photos?.length) {
+          user.picture = profile.photos[0].value;
+        }
+
+        await user.save();
+
+        return done(null, user);
+      }
+
+      // Tworzymy nowego użytkownika
+      user = await User.create({
+        githubId: profile.id,
+        name: profile.displayName || profile.username,
+        email: email,
+        picture: profile.photos?.[0]?.value
+      });
+
+      return done(null, user);
+
+    } catch (err) {
+      console.error(err);
+      return done(err);
+    }
+  };
 
   passport.use(new LocalStrategy({ usernameField: 'email' }, authenticateUser))
   passport.use(new GoogleStrategy({
@@ -60,6 +160,11 @@ function initialize(passport, getUserByEmail, getUserById) {
     clientSecret: process.env.GOOGLE_SECRET_KEY,
     callbackURL: 'http://localhost:3000/oauth2/redirect/google'
   }, authenticateUserGoogle))
+  passport.use(new GitHubStrategy({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/login/github/callback"
+  }, authenticateUserGitHub));
   passport.serializeUser((user, done) => done(null, user._id))
   passport.deserializeUser(async (id, done) => {
     return done(null, await getUserById(id))
