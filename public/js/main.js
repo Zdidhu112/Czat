@@ -206,9 +206,25 @@ async function loadUsers() {
         usersDiv.append(label);
     });
 }
+if (roomType.value === "private") {
+        usersDiv.style.display = "block";
+        userSearchInput.disabled = false;
+        userSearchInput.placeholder = "Publiczny czat jest dostępny dla wszystkich";
+    } else {
+        usersDiv.style.display = "none";
+        userSearchInput.disabled = true;
+        userSearchInput.placeholder = "Wyszukaj użytkownika";
+    }
 roomType.onchange = () => {
-    usersDiv.style.display =
-        roomType.value === "private" ? "block" : "none";
+    if (roomType.value === "private") {
+        usersDiv.style.display = "block";
+        userSearchInput.disabled = false;
+        userSearchInput.placeholder = "Publiczny czat jest dostępny dla wszystkich";
+    } else {
+        usersDiv.style.display = "none";
+        userSearchInput.disabled = true;
+        userSearchInput.placeholder = "Wyszukaj użytkownika";
+    }
 }
 saveRoom.onclick = async () => {
     const members = [
