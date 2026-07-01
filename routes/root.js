@@ -8,7 +8,6 @@ const path = require('path');
 
 const { createUser, findUserByEmail, findUserById, findUsersAll } = require("./../controller/actions");
 const {checkAuthenticated, checkNotAuthenticated} = require("../utils/auth-check");
-findUsersAll();
 
 router.use("/rooms", require("./rooms"));
 
@@ -44,7 +43,6 @@ router.get('/oauth2/redirect/google',
     passport.authenticate('google', {
         failureRedirect: '/login'
     }), (req, res) => {
-        console.log("redirecting..")
         res.redirect('/chat');
     })
 

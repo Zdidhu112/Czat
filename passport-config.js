@@ -83,8 +83,6 @@ function initialize(passport, getUserByEmail, getUserById) {
     done
   ) => {
     try {
-      console.log(profile);
-      console.log(JSON.stringify(profile, null, 2));
       let email = profile.emails?.[0]?.value;
 
       if (!email) {
@@ -104,8 +102,6 @@ function initialize(passport, getUserByEmail, getUserById) {
                 email = primary.email;
             }
         }
-        console.log(email);
-
         if (!email) {
             return done(null, false, {
                 message: "Nie udało się pobrać adresu e-mail z GitHuba."
@@ -158,12 +154,12 @@ function initialize(passport, getUserByEmail, getUserById) {
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_SECRET_KEY,
-    callbackURL: 'http://localhost:3000/oauth2/redirect/google'
+    callbackURL: process.env.GOOGLE_CALLBACK_URL
   }, authenticateUserGoogle))
   passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/login/github/callback"
+    callbackURL: process.env.GITHUB_CALLBACK_URL
   }, authenticateUserGitHub));
   passport.serializeUser((user, done) => done(null, user._id))
   passport.deserializeUser(async (id, done) => {
@@ -172,4 +168,4 @@ function initialize(passport, getUserByEmail, getUserById) {
 }
 
 
-module.exports = initialize
+module.exports = initializec

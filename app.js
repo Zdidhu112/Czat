@@ -25,18 +25,18 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
 
-const sessionMiddleware = session(
-  {
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-//     cookie:{
-//     httpOnly:true,
-//     secure:process.env.NODE_ENV==="production",
-//     sameSite: "none"
-// }
+app.set("trust proxy", 1);
+
+const sessionMiddleware = session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "lax"
   }
-)
+});
 app.use(sessionMiddleware);
 const initializePassport = require("./passport-config");
 initializePassport(passport, 
