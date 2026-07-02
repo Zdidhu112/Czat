@@ -20,6 +20,10 @@ const saveRoom = document.querySelector("#createRoom");
 const userSearchInput = document.querySelector("#userSearchInput");
 const emojiPickerBtn = document.querySelector("#emojiPickerBtn");
 const emojiPicker = document.querySelector(".emojiPicker");
+const chatInfoShowBtn = document.querySelector("#chatInfoShowBtn");
+const rightSidebar = document.querySelector(".rightSidebar");
+const leftSidebar = document.querySelector(".leftSidebar");
+const main = document.querySelector(".main");
 const { room } = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
@@ -121,7 +125,7 @@ function renderMessage(message) {
 
 function renderUsers(users) {
     activeUsersNumber.textContent = users.length;
-    userList.innerHTML = "";
+    // userList.innerHTML = "";
 
     users.forEach(user => {
         const li = document.createElement("li");
@@ -316,6 +320,23 @@ emojiPicker.addEventListener("click", (e) => {
     if (e.target.tagName === "LI") {
         chatInput.value = chatInput.value.slice(0, chatInput.selectionStart) + e.target.textContent + chatInput.value.slice(chatInput.selectionStart);
         emojiPicker.classList.toggle("hidden");
+
+    }
+})
+chatInfoShowBtn.addEventListener("click", ()=>{
+    if(rightSidebar.style.display === 'none') {
+        rightSidebar.style.display = 'flex';
+        if(window.innerWidth < 1200) {
+        leftSidebar.style.display = 'none';
+        if(window.innerWidth < 800) {
+            main.style.display = 'none';
+
+        }
+        }
+    } else {
+        rightSidebar.style.display = 'none';
+        leftSidebar.style.display = 'flex';
+        main.style.display = 'flex';
 
     }
 })

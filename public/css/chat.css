@@ -175,6 +175,7 @@ ul {
     background: white;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+    transition: 0.3s ease;
 }
 
 .leftSidebar header {
@@ -263,6 +264,7 @@ ul {
     flex-direction: column;
     margin-top: 16px;
     overflow-y: auto;
+    min-height: 0;
 }
 
 .chatList.public {
@@ -308,8 +310,12 @@ ul {
     gap: 4px;
 }
 
-.chatName {
+.chatList .chatName {
     font-weight: 600;
+      max-width: 160px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .lastMessage {
@@ -353,6 +359,8 @@ ul {
     display: flex;
     align-items: center;
     gap: 12px;
+     flex: 1;
+    min-width: 0;
 }
 
 .chatNameBox .icon {
@@ -373,6 +381,11 @@ ul {
 .chatNameBox .chatName {
     font-size: 20px;
     font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
 }
 
 .chatActions {
@@ -543,6 +556,9 @@ ul {
     background: white;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+    height: calc(100vh - 24px);
+    transition: 0.3s ease;
+
 }
 
 .infoBox {
@@ -571,6 +587,7 @@ ul {
 .infoBox .chatName {
     font-size: 20px;
     font-weight: 600;
+    word-break: break-all;
 }
 
 .chatBtns {
@@ -615,6 +632,8 @@ ul {
     background: white;
     border-radius: var(--radius);
     border: 1px solid var(--gray-200);
+    flex: 1;
+    min-height: 0;
 }
 
 .activeInfo {
@@ -831,7 +850,7 @@ body {
 }
 
 
-@media (max-width:1100px) {
+@media (max-width:1200px) {
     .rightSidebar {
         display: none;
     }
@@ -841,7 +860,6 @@ body {
     .leftSidebar {
         display: none;
     }
-
     .nav {
         width: 60px;
     }
