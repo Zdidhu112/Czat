@@ -195,6 +195,7 @@ async function loadRooms() {
 async function loadUsers() {
     const users = await fetch("/rooms/api/users")
         .then(res => res.json());
+    usersDiv.innerHTML = "";
     users.forEach(user => {
         const label = document.createElement("label");
 
