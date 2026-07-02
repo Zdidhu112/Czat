@@ -125,7 +125,7 @@ function renderMessage(message) {
 
 function renderUsers(users) {
     activeUsersNumber.textContent = users.length;
-    // userList.innerHTML = "";
+    userList.innerHTML = "";
 
     users.forEach(user => {
         const li = document.createElement("li");
@@ -195,7 +195,6 @@ async function loadRooms() {
 async function loadUsers() {
     const users = await fetch("/rooms/api/users")
         .then(res => res.json());
-    usersDiv.innerHTML = "";
     users.forEach(user => {
         const label = document.createElement("label");
 
