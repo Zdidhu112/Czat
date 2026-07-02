@@ -90,21 +90,15 @@ ul {
     font-variation-settings: 'wght' 600;
 }
 
-.chatList::-webkit-scrollbar,
-.messagesBox::-webkit-scrollbar,
-.activeBox ul::-webkit-scrollbar {
+:is(.chatList, .messagesBox, .activeBox ul, .emojiPicker)::-webkit-scrollbar {
     width: 5px;
 }
 
-.chatList::-webkit-scrollbar-thumb,
-.messagesBox::-webkit-scrollbar-thumb,
-.activeBox ul::-webkit-scrollbar-thumb {
+:is(.chatList, .messagesBox, .activeBox ul, .emojiPicker)::-webkit-scrollbar-thumb {
     background: #888;
 }
 
-.chatList::-webkit-scrollbar-thumb:hover,
-.messagesBox::-webkit-scrollbar-thumb:hover,
-.activeBox ul::-webkit-scrollbar-thumb:hover {
+:is(.chatList, .messagesBox, .activeBox ul, .emojiPicker)::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
 
@@ -876,18 +870,22 @@ body {
 
 .emojiPicker {
     position: absolute;
-    display: flex;
+    display: grid;
+    grid-template-columns:repeat(10, 1fr);
     align-items: center;
     gap: 4px;
     z-index: 3;
-    padding: 8px 12px;
+    padding: 12px 12px;
     /* border: 1px solid lightgrey; */
     background-color: white;
     border-radius: 8px;
     bottom: 36px;
+    overflow-y: auto;
+    max-height: 240px;
+    scrollbar-gutter: stable;
     box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.3),
-        0 2px 8px rgba(0, 0, 0, 0.15);
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .emojiPicker.hidden {
@@ -895,5 +893,11 @@ body {
 }
 
 .emojiPicker li {
+    font-size: 18px;
     cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+}
+.emojiPicker li:hover {
+    background-color: var(--gray-100);
 }
