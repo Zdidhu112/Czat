@@ -11,7 +11,6 @@ const roomName2 = document.querySelector(".infoBox .chatName");
 let roomSearchInput = document.querySelector("#roomSearchInput");
 const modalBox = document.querySelector(".modalBox");
 const modal = document.querySelector(".modal");
-const modalClose = document.querySelector(".closeModal");
 const showModalBtn = document.querySelector("#addChat");
 const usersDiv = document.querySelector("#users");
 const roomType = document.querySelector("#roomType");
@@ -24,15 +23,26 @@ const chatInfoShowBtn = document.querySelector("#chatInfoShowBtn");
 const rightSidebar = document.querySelector(".rightSidebar");
 const leftSidebar = document.querySelector(".leftSidebar");
 const main = document.querySelector(".main");
+const createRoomModal = document.querySelector(".createRoom");
+const replyMessageModal = document.querySelector(".replyMessage");
+const chatSettingsModal = document.querySelector(".chatSettings");
+const chatMembersModal = document.querySelector(".chatMembers");
+const modalRoomsList = document.querySelector("#modalRoomsList");
+const roomToReplySearchInput = document.querySelector("#roomToReplySearchInput");
 const { room } = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
 const roomId = room;
-
+let rooms = [];
 const socket = io();
 let myId;
-loadRooms();
-loadUsers();
+let actReplyId;
+init()
+async function init() {
+    await loadRooms();
+    await loadUsers();
+    roomsListCreate();
+}
 if (roomId) {
     socket.emit("joinRoom", roomId);
 } else {
@@ -75,6 +85,9 @@ chatInput.addEventListener("keypress", (e) => {
 function renderMessage(message) {
     const wrapper = document.createElement("div");
     wrapper.classList.add("message");
+    if (message._id) {
+        wrapper.dataset.id = message._id;
+    }
 
     if (message.user === myId) {
         wrapper.classList.add("my");
@@ -106,6 +119,7 @@ function renderMessage(message) {
     const share = document.createElement("span");
     share.classList.add("material-symbols-outlined");
     share.textContent = "ios_share";
+    share.classList.add("replyBtn")
 
     actions.appendChild(react);
     actions.appendChild(share);
@@ -141,7 +155,7 @@ async function loadRooms() {
     if (!chatListPrivate || !chatListPublic) return;
 
     try {
-        const rooms = await fetch("/rooms/api").then(res => res.json());
+        rooms = await fetch("/rooms/api").then(res => res.json());
 
         rooms.forEach(room => {
             const li = document.createElement("li");
@@ -211,14 +225,14 @@ async function loadUsers() {
     });
 }
 if (roomType.value === "private") {
-        usersDiv.style.display = "block";
-        userSearchInput.disabled = false;
-        userSearchInput.placeholder = "Wyszukaj użytkownika";
-    } else {
-        usersDiv.style.display = "none";
-        userSearchInput.disabled = true;
-        userSearchInput.placeholder = "Publiczny czat jest dostępny dla wszystkich";
-    }
+    usersDiv.style.display = "block";
+    userSearchInput.disabled = false;
+    userSearchInput.placeholder = "Wyszukaj użytkownika";
+} else {
+    usersDiv.style.display = "none";
+    userSearchInput.disabled = true;
+    userSearchInput.placeholder = "Dostępny dla wszystkich";
+}
 roomType.onchange = () => {
     if (roomType.value === "private") {
         usersDiv.style.display = "block";
@@ -227,7 +241,7 @@ roomType.onchange = () => {
     } else {
         usersDiv.style.display = "none";
         userSearchInput.disabled = true;
-        userSearchInput.placeholder = "Publiczny czat jest dostępny dla wszystkich";
+        userSearchInput.placeholder = "Dostępny dla wszystkich";
     }
 }
 saveRoom.onclick = async () => {
@@ -296,15 +310,15 @@ function roomSearch(inp, list, nameBox) {
     });
 }
 showModalBtn.addEventListener("click", (e) => {
+    closeOtherModals(createRoomModal);
     modalBox.style.display = "flex";
 })
 modalBox.addEventListener("click", (e) => {
     if (!e.target.closest(".modal")) {
         modalBox.style.display = "none";
+    } else if (e.target.classList.contains("closeModal")) {
+        modalBox.style.display = "none";
     }
-})
-modalClose.addEventListener("click", (e) => {
-    modalBox.style.display = "none";
 })
 userSearchInput.addEventListener("input", (e) => {
     roomSearch(userSearchInput, usersDiv, "label span");
@@ -323,15 +337,15 @@ emojiPicker.addEventListener("click", (e) => {
 
     }
 })
-chatInfoShowBtn.addEventListener("click", ()=>{
-    if(rightSidebar.style.display === 'none') {
+chatInfoShowBtn.addEventListener("click", () => {
+    if (rightSidebar.style.display === 'none') {
         rightSidebar.style.display = 'flex';
-        if(window.innerWidth < 1200) {
-        leftSidebar.style.display = 'none';
-        if(window.innerWidth < 800) {
-            main.style.display = 'none';
+        if (window.innerWidth < 1200) {
+            leftSidebar.style.display = 'none';
+            if (window.innerWidth < 800) {
+                main.style.display = 'none';
 
-        }
+            }
         }
     } else {
         rightSidebar.style.display = 'none';
@@ -339,4 +353,49 @@ chatInfoShowBtn.addEventListener("click", ()=>{
         main.style.display = 'flex';
 
     }
+})
+function closeOtherModals(open) {
+    for (let el of modal.children) {
+        if (el === open) {
+            el.classList.remove("hidden");
+        } else {
+            el.classList.add("hidden");
+
+        }
+    }
+}
+chatMessages.addEventListener("click", (e) => {
+    if (e.target.classList.contains("replyBtn")) {
+        const messageId = e.target.closest(".message").dataset.id;
+        if (messageId) {
+            closeOtherModals(replyMessageModal);
+            modalBox.style.display = "flex";
+            actReplyId = messageId;
+        }
+    }
+})
+function roomsListCreate() {
+    rooms.forEach(room => {
+        if (room._id != roomId) {
+            const label = document.createElement("label");
+            label.dataset.id = room._id;
+            const span = document.createElement("span");
+            span.textContent = room.name;
+
+            label.append(span);
+            modalRoomsList.append(label);
+        }
+    })
+}
+modalRoomsList.addEventListener("click", (e) => {
+    const label = e.target.closest("#modalRoomsList label");
+    if (label) {
+        if (actReplyId && label.dataset.id) {
+            socket.emit("reply", { msgId: actReplyId, roomId: label.dataset.id })
+            modalBox.style.display = "none";
+        }
+    }
+})
+roomToReplySearchInput.addEventListener("input", (e) => {
+    roomSearch(roomToReplySearchInput, modalRoomsList, "span");
 })

@@ -12,8 +12,9 @@ username: {
     },
 
     room: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: [mongoose.Schema.Types.ObjectId],
         ref: "Room",
+        index: true,
         required: true
     },
 

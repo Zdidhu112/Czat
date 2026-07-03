@@ -1,5 +1,5 @@
 const formatMessage = require("../utils/messages");
-const {isValidId} = require("../utils/id-valid");
+const { isValidId } = require("../utils/id-valid");
 const Message = require("./../db/models/message");
 const {
     userJoin,
@@ -7,8 +7,8 @@ const {
     userLeave,
     getRoomUsers,
 } = require("../utils/users");
-const { getMessages, createMessage } = require("./../controller/messages");
-const { getRoomById} = require("./../controller/rooms");
+const { getMessages, createMessage, addRoom } = require("./../controller/messages");
+const { getRoomById } = require("./../controller/rooms");
 
 const botName = "Bocik";
 
@@ -19,7 +19,7 @@ module.exports = function (io) {
         const userId = socket.request.user._id;
         const username = socketUser.name;
         socket.on("joinRoom", async (roomId) => {
-            if(!isValidId(roomId)) return;
+            if (!isValidId(roomId)) return;
             const user = userJoin(socket.id, username, roomId);
             const room = await getRoomById(roomId);
 
@@ -44,7 +44,7 @@ module.exports = function (io) {
 
             socket.emit(
                 "message",
-                formatMessage(botName, "Hejka!", 0)
+                formatMessage(botName, "Hejka!", 0, 0)
             );
 
             io.to(user.room).emit("roomUsers", {
@@ -57,27 +57,39 @@ module.exports = function (io) {
                 .to(user.room)
                 .emit(
                     "message",
-                    formatMessage(botName, `${user.username} joined`, 0)
+                    formatMessage(botName, `${user.username} joined`, 0, 0)
                 );
         });
 
         socket.on("chatMessage", async (msg) => {
             const user = getCurrentUser(socket.id);
-            if(!user) return;
-            await createMessage(userId, user.username, user.room, msg);
-            io.to(user.room).emit(
-                "message",
-                formatMessage(user.username, msg, userId)
-            );
+            if (!user) return;
+            const message = await createMessage(userId, user.username, user.room, msg);
+            if (message) {
+                io.to(user.room).emit(
+                    "message",
+                    formatMessage(user.username, msg, userId, message._id)
+                );
+            }
         });
-
+        socket.on("reply", async ({msgId, roomId})=>{
+            const user = getCurrentUser(socket.id);
+            if(!user) return;
+            const updatedMsg = await addRoom(roomId, msgId);
+            if(updatedMsg) {
+                io.to(roomId).emit(
+                    "message",
+                    formatMessage(user.username, updatedMsg.text, userId, msgId)
+                );
+            }
+        })
         socket.on("disconnect", () => {
             const user = userLeave(socket.id);
 
             if (user) {
                 io.to(user.room).emit(
                     "message",
-                    formatMessage(botName, `${user.username} left`)
+                    formatMessage(botName, `${user.username} left`, 0, 0)
                 );
 
                 io.to(user.room).emit("roomUsers", {

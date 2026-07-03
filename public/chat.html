@@ -203,6 +203,9 @@
                         <li>&#129478;</li>
                         <li>&#129479;</li>
                         <li>&#129480;</li>
+                        <li>&#127820;</li>
+                        <li>&#129382;</li>
+                        <li>&#129362;</li>
 
                         <li>&#128176;</li>
 
@@ -258,7 +261,7 @@
     </div>
     <div class="modalBox">
         <div class="modal">
-            <div class="createRoom">
+            <div class="createRoom content">
                 <header>
                     <span>Utwórz czat</span>
                     <button class="material-symbols-outlined closeModal">close</button>
@@ -279,11 +282,29 @@
                     <span class="material-symbols-outlined">search</span>
                     <input type="text" placeholder="Wyszukaj użytkownika" id="userSearchInput" name="s">
                 </div>
-                <div id="users">
+                <div id="users" class="modalList">
                 </div>
-                <button id="createRoom" type="submit">
+                <button id="createRoom" class="modalSendBtn">
                     Utwórz
                 </button>
+            </div>
+            <div class="replyMessage content">
+                  <header>
+                    <span>Prześlij wiadomość</span>
+                    <button class="material-symbols-outlined closeModal">close</button>
+                </header>
+                <label for="sr">Wybierz czaty</label>
+                <div class="inputDiv">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" placeholder="Wyszukaj użytkownika" id="roomToReplySearchInput" name="sr">
+                </div>
+                <div class="modalList" id="modalRoomsList"></div>
+            </div>
+            <div class="chatSettings">
+
+            </div>
+            <div class="chatMembers">
+
             </div>
         </div>
     </div>

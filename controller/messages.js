@@ -17,15 +17,29 @@ createMessage = async (user, username, room, text) => {
         const message = new Message({
             user,
             username,
-            room,
+            room: [room],
             text,
             time: moment().format("h:mm a")
         });
         await message.save();
+        return message;
 
     } catch (error) {
         console.log(error);
     }
 }
+addRoom = async (roomId, messageId) => {
+    try {
+        const msg = await Message.findOne({ _id: messageId });
+        if (!msg) return null;
+        if (!msg.room.includes(roomId)) {
+            msg.room.push(roomId);
+        }
+        await msg.save();
+        return msg;
+    } catch (error) {
+        console.log(error);
+    }
+}
 
-module.exports = { getMessages, createMessage }
+module.exports = { getMessages, createMessage, addRoom }
