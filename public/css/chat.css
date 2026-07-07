@@ -19,6 +19,14 @@
     --nav-width: 75px;
 
     --icon-size: 36px;
+
+    /* motyw */
+    --theme-bg: white;
+    --theme-accent: #0866FF;
+    --theme-bg-msg: rgba(226, 229, 233, .5);
+    --theme-text: black;
+    --theme-text-secondary: white;
+    /* --theme-text-secondary: color-mix(in srgb, var(--theme-text) 65%, transparent); */
 }
 
 * {
@@ -109,7 +117,7 @@ ul {
     justify-content: space-between;
     align-items: center;
     padding: 24px 8px;
-    background: var(--primary);
+    background: var(--theme-accent);
     border-radius: var(--radius);
 }
 
@@ -120,7 +128,7 @@ ul {
     justify-content: center;
     align-items: center;
     background: white;
-    color: var(--primary);
+    color: var(--theme-accent);
     border-radius: var(--radius);
     font-size: 24px;
     font-weight: bold;
@@ -335,7 +343,8 @@ ul {
     flex-direction: column;
     margin: 12px;
     overflow: hidden;
-    background: var(--white);
+    background: var(--theme-bg);
+    color: var(--theme-text);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
 }
@@ -346,8 +355,9 @@ ul {
     justify-content: space-between;
     align-items: center;
     padding: 8px 24px;
-    background: var(--white);
-    border-bottom: 2px solid var(--gray-200);
+    background: var(--theme-bg);
+    /* border-bottom: 2px solid var(--gray-200); */
+    border-bottom: 2px solid color-mix(in srgb, var(--theme-text) 15%, var(--theme-bg));
 }
 
 .chatNameBox {
@@ -365,8 +375,8 @@ ul {
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    background: var(--primary);
-    color: white;
+    background: var(--theme-accent);
+    color: var(--theme-text-secondary);
 }
 
 .chatNameBox .icon span {
@@ -396,7 +406,7 @@ ul {
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    color: var(--primary);
+    color: var(--theme-accent);
     cursor: pointer;
     font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 48;
     transition: .2s;
@@ -412,7 +422,7 @@ ul {
     flex-direction: column;
     padding: 12px;
     overflow-y: auto;
-    background: white;
+    background: var(--theme-bg);
 }
 
 .message {
@@ -490,15 +500,17 @@ ul {
     max-width: 540px;
     padding: 8px 12px;
     border-radius: 16px;
-    background: var(--primary);
-    color: white;
+    background: var(--theme-accent);
+    color: var(--theme-text-secondary);
     font-size: 16px;
     word-break: break-word;
 }
 
 .message:not(.my) .msgText {
-    background: #f0f0f0;
-    color: black;
+    /* background: #f0f0f0;
+    color: black; */
+    background-color: var(--theme-bg-msg);
+    color: var(--theme-text);
 }
 
 .msgInputDiv {
@@ -506,8 +518,8 @@ ul {
     align-items: center;
     gap: 8px;
     padding: 10px;
-    border-top: 2px solid var(--gray-200);
-    background: white;
+    border-top: 2px solid color-mix(in srgb, var(--theme-text) 15%, var(--theme-bg));
+    background: var(--theme-bg);
 }
 
 .msgInputDiv span {
@@ -517,14 +529,14 @@ ul {
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    color: var(--primary);
+    color: var(--theme-accent);
     cursor: pointer;
     transition: .2s;
     font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 48;
 }
 
 .msgInputDiv span:hover {
-    background: rgba(226, 229, 233, .5);
+    background: var(--theme-bg-msg);
 }
 
 .msgInputDiv input {
@@ -533,12 +545,13 @@ ul {
     border: none;
     outline: none;
     border-radius: 12px;
-    background: rgba(226, 229, 233, .5);
+    background: var(--theme-bg-msg);
     font-size: 16px;
+    color: var(--theme-text);
 }
 
 .msgInputDiv input:focus {
-    outline: 2px solid var(--primary);
+    outline: 2px solid var(--theme-accent);
 }
 
 .rightSidebar {
@@ -706,6 +719,8 @@ ul {
 .modal header span {
     font-size: 24px;
     font-weight: 700;
+    text-align: center;
+    flex: 1;
 }
 
 .content >label {
@@ -790,7 +805,7 @@ ul {
     cursor: pointer;
 }
 
-.modal button.modalSendBtn {
+.modal button:is(.modalSendBtn, .saveRoomSettingsBtn) {
     padding: 12px;
     border-radius: 8px;
     background: var(--primary);
@@ -802,12 +817,47 @@ ul {
     border: none;
     cursor: pointer;
 }
+.modal button.deleteRoomBtn {
+    padding: 12px;
+    border-radius: 8px;
+    background: #ff0808;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    transition: .2s;
+    outline: none;
+    border: none;
+    cursor: pointer;
+}
+.modal button.deleteRoomBtn:hover {
+    background-color: #cd0707;
+}
 
-#createRoom:hover {
-    background: #0753cd;
+button:is(.modalSendBtn, .saveRoomSettingsBtn):hover {
+    background-color: #0753cd;
 }
 .modal > div.hidden {
     display: none;
+}
+.modal .themeInputBox {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+    font-size: 16px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+.modal .themeInputBox .option {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.modal .themeInputBox input{
+    width: 14px;
+    height: 14px;
+    margin-top: 2px;
+    cursor: pointer;
 }
 @media (max-width:1200px) {
     .rightSidebar {

@@ -7,8 +7,8 @@ const {
     userLeave,
     getRoomUsers,
 } = require("../utils/users");
-const { getMessages, createMessage, addRoom } = require("./../controller/messages");
-const { getRoomById } = require("./../controller/rooms");
+const { getMessages, createMessage, replyMessage } = require("./../controller/messages");
+const { getRoomById, deleteRoom, updateSettings } = require("./../controller/rooms");
 
 const botName = "Bocik";
 
@@ -39,7 +39,7 @@ module.exports = function (io) {
 
             socket.join(user.room);
             const messages = await getMessages(user.room);
-            socket.emit("id", userId);
+            socket.emit("roomInfo", {id: userId, roomData: room});
             socket.emit("chatHistory", messages);
 
             socket.emit(
@@ -72,15 +72,31 @@ module.exports = function (io) {
                 );
             }
         });
-        socket.on("reply", async ({msgId, roomId})=>{
-            const user = getCurrentUser(socket.id);
-            if(!user) return;
-            const updatedMsg = await addRoom(roomId, msgId);
-            if(updatedMsg) {
+        socket.on("reply", async ({ msgId, roomId }) => {
+            const replicatedMsg = await replyMessage(roomId, msgId, userId, username);
+            if (replicatedMsg) {
                 io.to(roomId).emit(
                     "message",
-                    formatMessage(user.username, updatedMsg.text, userId, msgId)
+                    formatMessage(username, replicatedMsg.text, userId, msgId)
                 );
+            }
+        })
+        socket.on("deleteRoom", async (roomId) => {
+            console.log(roomId)
+            const room =  await deleteRoom(roomId, userId);
+            if(room) {
+                io.to(roomId).emit("roomDeleted");
+    
+                io.in(roomId).socketsLeave(roomId);
+            }
+        })
+        socket.on("changeSettings", async ({roomId, data}) =>{
+            console.log(data);
+            const room = await updateSettings(roomId, userId, data);
+            console.log(room);
+            
+            if(room) {
+                socket.to(roomId).emit("roomUpdate", room);
             }
         })
         socket.on("disconnect", () => {

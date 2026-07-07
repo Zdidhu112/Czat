@@ -29,14 +29,54 @@ const chatSettingsModal = document.querySelector(".chatSettings");
 const chatMembersModal = document.querySelector(".chatMembers");
 const modalRoomsList = document.querySelector("#modalRoomsList");
 const roomToReplySearchInput = document.querySelector("#roomToReplySearchInput");
+const openSettingsBtn = document.querySelector("#openSettingsBtn");
+const deleteRoomBtn = document.querySelector(".deleteRoomBtn");
+const root = document.querySelector(':root');
+const themeInputBox = document.querySelector('.themeInputBox');
+const saveRoomSettingsBtn = document.querySelector('.saveRoomSettingsBtn');
+const changeChatName = document.querySelector('#changeChatName');
 const { room } = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
+const themeMap = [
+    "light",
+    "dark",
+    "amoled",
+    "ocean",
+    "forest",
+    "purple",
+    "sunset",
+    "sakura",
+    "nord",
+    "dracula",
+    "solarizedLight",
+    "solarizedDark",
+    "rose",
+    "orange",
+    "emerald"
+];
+const themes = {
+    light: ["#FFFFFF", "#0866FF", "rgba(226,229,233,.5)", "#000000", "#ffffff"],
+    dark: ["#1E1F22", "#5865F2", "rgba(43,45,49,.9)", "#FFFFFF", "#c7cbd1"],
+    amoled: ["#000000", "#02a8bb", "rgba(20,20,20,.95)", "#FFFFFF", "#e2e8f0"],
+    ocean: ["#0B1F33", "#00B8D9", "rgba(22,50,79,.85)", "#F0F9FF", "#cfe3f0"],
+    forest: ["#0F1A14", "#4CAF50", "rgba(28,42,32,.85)", "#EAF4EC", "#cfe0d6"],
+    purple: ["#18122B", "#A855F7", "rgba(57,48,83,.85)", "#F7F7F7", "#d2cbe6"],
+    sunset: ["#2B1B17", "#FF7043", "rgba(74,46,42,.85)", "#FFF4E6", "#e6d2c8"],
+    sakura: ["#FFF1F5", "#EC4899", "rgba(255,228,236,.8)", "#4A2C38", "#6b4a56"],
+    nord: ["#2E3440", "#88C0D0", "rgba(59,66,82,.9)", "#ECEFF4", "#cfd6e0"],
+    dracula: ["#282A36", "#BD93F9", "rgba(68,71,90,.9)", "#F8F8F2", "#cfcfe6"],
+    solarizedLight: ["#FDF6E3", "#B58900", "rgba(238,232,213,.8)", "#073642", "#4f5d63"],
+    solarizedDark: ["#002B36", "#268BD2", "rgba(7,54,66,.85)", "#EEE8D5", "#c9d3c1"],
+    rose: ["#FFF5F7", "#E11D48", "rgba(255,228,236,.8)", "#3F0D1E", "#6a2b3b"],
+    orange: ["#FFF8F1", "#F97316", "rgba(255,237,213,.75)", "#3B2413", "#6a3b1f"],
+    emerald: ["#ECFDF5", "#10B981", "rgba(209,250,229,.75)", "#064E3B", "#2f6b57"]
+};
 const roomId = room;
+let roomData;
 let rooms = [];
 const socket = io();
-let myId;
-let actReplyId;
+let myId, actReplyId, activeTheme;
 init()
 async function init() {
     await loadRooms();
@@ -48,16 +88,27 @@ if (roomId) {
 } else {
     roomName.textContent = "Wybierz czat";
     roomName2.textContent = "Wybierz czat";
+    openSettingsBtn.disabled = true;
 }
-socket.on("id", id => {
-    myId = id;
+socket.on("roomInfo", (info) => {
+    myId = info.id;
+    roomData = info.roomData;
+    changeChatName.value = roomData.name;
+    if (roomData.name) {
+        roomName.textContent = roomData.name;
+        roomName2.textContent = roomData.name;
+    }
+    if (roomData.theme) {
+        console.log(roomData.theme);
+
+        selectTheme(roomData.theme)
+    } else {
+        selectTheme(1)
+    }
+
 
 })
-socket.on("roomUsers", ({ users, name, }) => {
-    if (name) {
-        roomName.textContent = name;
-        roomName2.textContent = name;
-    }
+socket.on("roomUsers", ({ users }) => {
     renderUsers(users);
 });
 
@@ -398,4 +449,67 @@ modalRoomsList.addEventListener("click", (e) => {
 })
 roomToReplySearchInput.addEventListener("input", (e) => {
     roomSearch(roomToReplySearchInput, modalRoomsList, "span");
+})
+openSettingsBtn.addEventListener("click", (e) => {
+    closeOtherModals(chatSettingsModal);
+    modalBox.style.display = "flex";
+})
+deleteRoomBtn.addEventListener("click", (e) => {
+    console.log(roomId);
+
+    socket.emit("deleteRoom", roomId);
+})
+socket.on("roomDeleted", () => {
+    alert("Usunięto czat");
+    window.location.href = "/chat";
+})
+function selectTheme(code) {
+    const name = themeMap[code - 1] || "light";
+    setTheme(themes[name]);
+}
+function setTheme(theme) {
+    const [bg, ac, bgM, t1, t2] = theme;
+
+    root.style.setProperty('--theme-bg', bg);
+    root.style.setProperty('--theme-accent', ac);
+    root.style.setProperty('--theme-bg-msg', bgM);
+    root.style.setProperty('--theme-text', t1);
+    root.style.setProperty('--theme-text-secondary', t2);
+}
+
+themeInputBox.addEventListener("change", (e) => {
+    if (e.target.name != "theme") return;
+    const selectedTheme = Number(e.target.value)
+    activeTheme = selectedTheme;
+    selectTheme(selectedTheme);
+})
+socket.on("roomUpdate", (r) => {
+    roomData = r;
+    console.dir(roomData);
+
+    roomName.textContent = roomData.name;
+    roomName2.textContent = roomData.name;
+    changeChatName.value = roomData.name;
+    if (room.theme) {
+        selectTheme(room.theme);
+    }
+})
+saveRoomSettingsBtn.addEventListener("click", (e) => {
+    if (roomData.owner != myId && roomData.members.findIndex(el => el.user === myId && el.role === "admin") === -1) {
+        alert("Brak uprawnień");
+    } else {
+        const data = {}
+        if (changeChatName.value != roomData.name) {
+            data.name = changeChatName.value;
+        }
+        if (activeTheme != roomData.theme) {
+            data.theme = activeTheme;
+        }
+        console.log(data);
+
+        if (Object.keys(data).length > 0) {
+            socket.emit("changeSettings", { roomId, data });
+            modalBox.style.display = "none";
+        }
+    }
 })

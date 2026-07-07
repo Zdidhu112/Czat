@@ -12,6 +12,10 @@ const roomSchema = new mongoose.Schema({
       enum: ['public', 'private'],
       default: 'public'
    },
+   theme: {
+      type: Number,
+      default: 1
+   },
    owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

@@ -237,7 +237,7 @@
                         <span>Członkowie</span>
                     </div>
 
-                    <div class="el">
+                    <div class="el" id="openSettingsBtn">
                         <span class="material-symbols-outlined chatBtns icon">settings</span>
                         <span>Ustawienia</span>
                     </div>
@@ -289,7 +289,7 @@
                 </button>
             </div>
             <div class="replyMessage content">
-                  <header>
+                <header>
                     <span>Prześlij wiadomość</span>
                     <button class="material-symbols-outlined closeModal">close</button>
                 </header>
@@ -300,8 +300,92 @@
                 </div>
                 <div class="modalList" id="modalRoomsList"></div>
             </div>
-            <div class="chatSettings">
+            <div class="chatSettings content">
+                <header>
+                    <span>Ustawienia</span>
+                    <button class="material-symbols-outlined closeModal">close</button>
+                </header>
+                <label for="nameInp">Nazwa</label>
+                <input type="text" name="nameInp" id="changeChatName" placeholder="Zmień nazwę czatu" value="">
+                <label for="theme">Motyw</label>
+                <div class="themeInputBox">
+                    <div class="option">
+                        <input type="radio" id="theme1" name="theme" value="1" checked>
+                        <label for="theme1">Light</label>
+                    </div>
 
+                    <div class="option">
+                        <input type="radio" id="theme2" name="theme" value="2">
+                        <label for="theme2">Dark</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme3" name="theme" value="3">
+                        <label for="theme3">AMOLED</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme4" name="theme" value="4">
+                        <label for="theme4">Ocean</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme5" name="theme" value="5">
+                        <label for="theme5">Forest</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme6" name="theme" value="6">
+                        <label for="theme6">Purple</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme7" name="theme" value="7">
+                        <label for="theme7">Sunset</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme8" name="theme" value="8">
+                        <label for="theme8">Sakura</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme9" name="theme" value="9">
+                        <label for="theme9">Nord</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme10" name="theme" value="10">
+                        <label for="theme10">Dracula</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme11" name="theme" value="11">
+                        <label for="theme11">Solarized Light</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme12" name="theme" value="12">
+                        <label for="theme12">Solarized Dark</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme13" name="theme" value="13">
+                        <label for="theme13">Rose</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme14" name="theme" value="14">
+                        <label for="theme14">Orange</label>
+                    </div>
+
+                    <div class="option">
+                        <input type="radio" id="theme15" name="theme" value="15">
+                        <label for="theme15">Emerald</label>
+                    </div>
+                </div>
+                <button class="saveRoomSettingsBtn">Zapisz</button>
+                <button class="deleteRoomBtn">Usuń czat</button>
             </div>
             <div class="chatMembers">
 

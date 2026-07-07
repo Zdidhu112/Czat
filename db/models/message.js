@@ -1,18 +1,18 @@
 const mongoose = require('mongoose');
 
 const commentSchema = new mongoose.Schema({
- user: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
-username: {
+    username: {
         type: String,
         required: true
     },
 
     room: {
-        type: [mongoose.Schema.Types.ObjectId],
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Room",
         index: true,
         required: true
@@ -24,9 +24,14 @@ username: {
         trim: true,
         maxlength: 500
     },
+    // shared: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Message",
+    //     default: null
+    // },
     time: {
-      type: String,
-      required: true
+        type: String,
+        required: true
     }
 
 }, {

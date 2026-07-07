@@ -17,7 +17,7 @@ createMessage = async (user, username, room, text) => {
         const message = new Message({
             user,
             username,
-            room: [room],
+            room,
             text,
             time: moment().format("h:mm a")
         });
@@ -28,18 +28,23 @@ createMessage = async (user, username, room, text) => {
         console.log(error);
     }
 }
-addRoom = async (roomId, messageId) => {
+replyMessage = async (roomId, messageId, user, username) => {
     try {
-        const msg = await Message.findOne({ _id: messageId });
-        if (!msg) return null;
-        if (!msg.room.includes(roomId)) {
-            msg.room.push(roomId);
-        }
-        await msg.save();
-        return msg;
+        let originalMsg = await Message.findById(messageId);
+        if(!originalMsg) throw new Error("Nie znalezionoo powielanej wiadomości")
+        const message = new Message({
+            user,
+            username: username + " przesłał  wiadomość",
+            room: roomId,
+            text: originalMsg.text,
+            reply: messageId,
+            time: moment().format("h:mm a")
+        });
+        await message.save();
+        return message;
     } catch (error) {
         console.log(error);
     }
 }
 
-module.exports = { getMessages, createMessage, addRoom }
+module.exports = { getMessages, createMessage, replyMessage }
