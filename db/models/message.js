@@ -24,6 +24,12 @@ const commentSchema = new mongoose.Schema({
         trim: true,
         maxlength: 500
     },
+    likes: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
     // shared: {
     //     type: mongoose.Schema.Types.ObjectId,
     //     ref: "Message",

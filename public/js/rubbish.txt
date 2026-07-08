@@ -1,0 +1,158 @@
+const membersList = document.querySelector(".membersList");
+const chatMembersBtn = document.querySelector(".chatBtns .el:nth-child(2)");
+chatMembersBtn.addEventListener("click", () => {
+
+    closeOtherModals(chatMembersModal);
+
+    modalBox.style.display = "flex";
+
+    renderMembers();
+
+});
+function renderMembers() {
+
+    membersList.innerHTML = "";
+
+    roomData.members.forEach(member => {
+
+        const div = document.createElement("div");
+        div.className = "member";
+
+        div.dataset.id = member.user;
+
+        div.innerHTML = `
+            <div class="icon">
+                <span class="material-symbols-outlined">person</span>
+            </div>
+
+            <div class="memberInfo">
+                <div class="memberName">
+                    ${member.user.name}
+                </div>
+
+                <div class="memberRole">
+                    ${member.role}
+                </div>
+            </div>
+
+            <div class="memberActions">
+
+            </div>
+        `;
+
+        membersList.append(div);
+        if (canManage(member)) {
+
+            const actions = div.querySelector(".memberActions");
+            actions.innerHTML = `
+        <span class="material-symbols-outlined promoteBtn">
+            arrow_upward
+        </span>
+
+        <span class="material-symbols-outlined removeBtn">
+            person_remove
+        </span>
+    `;
+
+        }
+
+    });
+
+}
+
+
+function canManage(member) {
+    console.log(member)
+    const me = roomData.members.find(m => m.user._id === myId);
+
+    if (!me) return false;
+
+    if (me.role === "owner")
+        return member.user._id !== myId;
+
+    if (me.role === "admin")
+        return member.role === "member";
+
+    return false;
+
+}
+.membersActions{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:8px;
+}
+
+.addMemberBtn{
+    padding:8px 14px;
+    border-radius:8px;
+    background:var(--primary);
+    color:white;
+    font-weight:600;
+}
+
+.membersList{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:420px;
+    overflow-y:auto;
+}
+.member{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:10px 12px;
+
+    border-radius:12px;
+    background:var(--gray-100);
+}
+
+.member .icon{
+    width:42px;
+    height:42px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:50%;
+    background:var(--primary-dark);
+    color:white;
+}
+.memberInfo{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.memberName{
+    font-weight:600;
+}
+
+.memberRole{
+    font-size:13px;
+    color:var(--gray-500);
+}
+.memberActions{
+    display:flex;
+    gap:4px;
+}
+
+.memberActions span{
+    width:34px;
+    height:34px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:50%;
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.memberActions span:hover{
+    background:var(--gray-200);
+}

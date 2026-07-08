@@ -35,6 +35,12 @@ const root = document.querySelector(':root');
 const themeInputBox = document.querySelector('.themeInputBox');
 const saveRoomSettingsBtn = document.querySelector('.saveRoomSettingsBtn');
 const changeChatName = document.querySelector('#changeChatName');
+const msgSBox = document.querySelector('.rightSidebar .inputDiv');
+const messageSearchInput = msgSBox.querySelector('#messageSearchInput');
+const openMsgSearch = document.querySelector('#openMsgSearch');
+const addMemberBtn = document.querySelector('.addMemberBtn');
+const openMembersBtn = document.querySelector('#openMembersBtn');
+const chatMembers = document.querySelector('.chatMembers');
 const { room } = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
@@ -53,7 +59,12 @@ const themeMap = [
     "solarizedDark",
     "rose",
     "orange",
-    "emerald"
+    "emerald",
+     "leo",
+    "banan",
+    "plesn",
+    "tigiCookie",
+    "mystery"    
 ];
 const themes = {
     light: ["#FFFFFF", "#0866FF", "rgba(226,229,233,.5)", "#000000", "#ffffff"],
@@ -70,8 +81,16 @@ const themes = {
     solarizedDark: ["#002B36", "#268BD2", "rgba(7,54,66,.85)", "#EEE8D5", "#c9d3c1"],
     rose: ["#FFF5F7", "#E11D48", "rgba(255,228,236,.8)", "#3F0D1E", "#6a2b3b"],
     orange: ["#FFF8F1", "#F97316", "rgba(255,237,213,.75)", "#3B2413", "#6a3b1f"],
-    emerald: ["#ECFDF5", "#10B981", "rgba(209,250,229,.75)", "#064E3B", "#2f6b57"]
+    emerald: ["#ECFDF5", "#10B981", "rgba(209,250,229,.75)", "#064E3B", "#2f6b57"],
+
+    // 🔥 Twoje motywy:
+    leo: ["#f9c850", "#563915", "rgb(0 0 0 / 85%)", "#fffef3", "#fff7e3"],
+    banan: ["#fff494", "#d9c568", "rgb(208 197 146 / 85%)", "#604d00", "#5b4700"],
+    plesn: ["#cbd0bf", "#a1855c", "rgb(131 146 80 / 85%)", "#212121", "#262626"],
+    tigiCookie: ["#ffe4b4", "#8b7351", "rgb(173 119 59 / 85%)", "#623c00", "#2e1700"],
+    mystery: ["#d9f0ff", "#c3c8ff", "rgb(239 253 255 / 85%)", "#8d90ff", "#7893d0"]
 };
+
 const roomId = room;
 let roomData;
 let rooms = [];
@@ -94,6 +113,9 @@ socket.on("roomInfo", (info) => {
     myId = info.id;
     roomData = info.roomData;
     changeChatName.value = roomData.name;
+    if (roomData.type === 'public') {
+        listShowPublic.click()
+    }
     if (roomData.name) {
         roomName.textContent = roomData.name;
         roomName2.textContent = roomData.name;
@@ -105,7 +127,7 @@ socket.on("roomInfo", (info) => {
     } else {
         selectTheme(1)
     }
-
+    renderMembers();
 
 })
 socket.on("roomUsers", ({ users }) => {
@@ -165,6 +187,7 @@ function renderMessage(message) {
 
     const react = document.createElement("span");
     react.classList.add("material-symbols-outlined");
+    react.classList.add("likeBtn");
     react.textContent = "add_reaction";
 
     const share = document.createElement("span");
@@ -182,8 +205,25 @@ function renderMessage(message) {
     box.appendChild(actions);
     box.appendChild(text);
 
+    const reactionsBox = document.createElement("div");
+    reactionsBox.classList.add("reactionsBox");
+
+    const reactions = document.createElement("div");
+    reactions.classList.add("reactions");
+    console.log(message.likes);
+
+    if (message.likes?.length > 0) {
+        reactions.textContent = `👍 ${message.likes.length}`;
+
+    } else {
+        reactionsBox.classList.add("hidden")
+    }
+
+    reactionsBox.appendChild(reactions)
+
     wrapper.appendChild(info);
     wrapper.appendChild(box);
+    wrapper.appendChild(reactionsBox);
 
     chatMessages.appendChild(wrapper);
 }
@@ -238,7 +278,7 @@ async function loadRooms() {
 
             const time = document.createElement("div");
             time.className = "time";
-            time.textContent = room.lastMessageTime || "12:50";
+            time.textContent = room.updatedAt ? formatTime(room.updatedAt) : "12:50";
 
             li.append(icon, info, time);
 
@@ -423,6 +463,15 @@ chatMessages.addEventListener("click", (e) => {
             modalBox.style.display = "flex";
             actReplyId = messageId;
         }
+    } else if (e.target.classList.contains("likeBtn")) {
+        console.log("Klik!");
+
+        const messageId = e.target.closest(".message").dataset.id;
+        if (messageId) {
+            console.log(messageId);
+
+            socket.emit("like", messageId)
+        }
     }
 })
 function roomsListCreate() {
@@ -490,9 +539,17 @@ socket.on("roomUpdate", (r) => {
     roomName.textContent = roomData.name;
     roomName2.textContent = roomData.name;
     changeChatName.value = roomData.name;
+    const li = document.querySelector(
+        `.el[data-id="${room._id}"]`
+    );
+    li.querySelector(".chatName").textContent = room.name;
+
     if (room.theme) {
         selectTheme(room.theme);
     }
+})
+socket.on("roomsListUpdated", (r) => {
+    updateRoom(r);
 })
 saveRoomSettingsBtn.addEventListener("click", (e) => {
     if (roomData.owner != myId && roomData.members.findIndex(el => el.user === myId && el.role === "admin") === -1) {
@@ -512,4 +569,60 @@ saveRoomSettingsBtn.addEventListener("click", (e) => {
             modalBox.style.display = "none";
         }
     }
+})
+function formatTime(date) {
+    const d = new Date(date);
+
+    return d.toLocaleTimeString("pl-PL", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+function updateRoom(room) {
+
+    const li = document.querySelector(
+        `.el[data-id="${room.roomId}"]`
+    );
+
+    if (!li) return;
+
+    li.querySelector(".lastMessage").textContent = room.lastMessage;
+
+    li.querySelector(".time").textContent = room.updatedAt ? formatTime(room.updatedAt) : "12:50";
+
+    li.parentElement.prepend(li);
+}
+socket.on("msgReaction", ({ messageId, likes }) => {
+    console.log(messageId, likes)
+    updateLikes(messageId, likes);
+})
+function updateLikes(messageId, likes) {
+    const reactionsBox = document.querySelector(`.message[data-id="${messageId}"] .reactionsBox`);
+    if (!reactionsBox) return;
+    const reactions = reactionsBox.querySelector(".reactions");
+    const count = Array.isArray(likes) ? likes.length : likes;
+
+    if (!count || count === 0) {
+        reactionsBox.classList.add("hidden");
+    } else {
+        if (reactionsBox.classList.contains("hidden")) {
+            reactionsBox.classList.remove("hidden");
+        }
+        reactions.textContent = `👍 ${likes.length}`;
+    }
+}
+messageSearchInput.addEventListener("input", (e) => {
+    roomSearch(messageSearchInput, chatMessages, ".msgText");
+})
+openMsgSearch.addEventListener("click", (e) => {
+    if (msgSBox.classList.contains("hidden")) {
+        msgSBox.classList.remove("hidden");
+    } else {
+        msgSBox.classList.add("hidden");
+    }
+})
+
+openMembersBtn.addEventListener("click", (e)=>{
+     closeOtherModals(chatMembers);
+    modalBox.style.display = "flex";
 })

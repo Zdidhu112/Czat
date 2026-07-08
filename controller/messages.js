@@ -2,7 +2,7 @@ const moment = require('moment');
 
 const Message = require('./../db/models/message');
 
-getMessages = async (room) => {
+const getMessages = async (room) => {
     try {
         return await Message
             .find({ room })
@@ -12,7 +12,7 @@ getMessages = async (room) => {
         console.log(err)
     }
 };
-createMessage = async (user, username, room, text) => {
+const createMessage = async (user, username, room, text) => {
     try {
         const message = new Message({
             user,
@@ -28,10 +28,10 @@ createMessage = async (user, username, room, text) => {
         console.log(error);
     }
 }
-replyMessage = async (roomId, messageId, user, username) => {
+const replyMessage = async (roomId, messageId, user, username) => {
     try {
         let originalMsg = await Message.findById(messageId);
-        if(!originalMsg) throw new Error("Nie znalezionoo powielanej wiadomości")
+        if (!originalMsg) throw new Error("Nie znalezionoo powielanej wiadomości")
         const message = new Message({
             user,
             username: username + " przesłał  wiadomość",
@@ -46,5 +46,24 @@ replyMessage = async (roomId, messageId, user, username) => {
         console.log(error);
     }
 }
+const toggleLike = async (messageId, userId) =>{
+    try {
+        const message = await Message.findById(messageId);
 
-module.exports = { getMessages, createMessage, replyMessage }
+        if(!message) return null;
+
+        const index = message.likes.findIndex(el => {
+            return el.equals(userId);
+        })
+        if(index === -1) {
+            message.likes.push(userId);
+        } else {
+            message.likes.splice(index, 1)
+        }
+        await message.save();
+        return message;
+    } catch (error) {
+        console.log(error);        
+    }
+}
+module.exports = { getMessages, createMessage, replyMessage, toggleLike }

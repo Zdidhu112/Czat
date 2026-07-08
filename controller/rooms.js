@@ -44,14 +44,14 @@ const getUserRooms = async (userId) => {
           "members.user": userId
         }
       ]
-    })
+    }).sort({updatedAt: -1});
   } catch (error) {
     console.log(error);
   }
 }
 const getRoomById = async (id) => {
   try {
-    return await Room.findById(id);
+    return await Room.findById(id).populate("members.user", "name");
   } catch (error) {
     console.log(error);
   }
@@ -95,10 +95,20 @@ const updateSettings = async (roomId, userId, data) => {
     return null;
   }
 }
+const updateLast = async (roomId, text) =>{
+  try {
+    const room = await Room.findByIdAndUpdate(roomId, {lastMessage: text});
+
+    return room;
+  } catch (error) {
+    console.log(error);
+  }
+}
 module.exports = {
   createRoom,
   getUserRooms,
   getRoomById,
   deleteRoom,
-  updateSettings
+  updateSettings,
+  updateLast
 }

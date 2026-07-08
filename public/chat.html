@@ -7,8 +7,7 @@
     <title>Czat</title>
 
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
-
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add_moderator,add_reaction,call,chat,chat_add_on,close,face,group,home,info,ios_share,logout,mood,more_horiz,person,person_remove,search,settings,videocam&display=block">
     <link rel="stylesheet" href="./css/chat.css">
 </head>
 
@@ -227,12 +226,12 @@
                 <div class="chatName">Pies Wison</div>
 
                 <div class="chatBtns">
-                    <div class="el">
+                    <div class="el" id="openMsgSearch">
                         <span class="material-symbols-outlined chatBtns icon">search</span>
                         <span>Szukaj</span>
                     </div>
 
-                    <div class="el">
+                    <div class="el" id="openMembersBtn">
                         <span class="material-symbols-outlined chatBtns icon">group</span>
                         <span>Członkowie</span>
                     </div>
@@ -243,7 +242,10 @@
                     </div>
                 </div>
             </div>
-
+            <div class="inputDiv hidden">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" placeholder="Wyszukaj czat" id="messageSearchInput">
+            </div>
             <div class="activeBox">
 
                 <div class="activeInfo">
@@ -383,11 +385,96 @@
                         <input type="radio" id="theme15" name="theme" value="15">
                         <label for="theme15">Emerald</label>
                     </div>
+                    <div class="option">
+                        <input type="radio" id="theme16" name="theme" value="16">
+                        <label for="theme16">Leo</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="theme17" name="theme" value="17">
+                        <label for="theme17">Banan</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="theme18" name="theme" value="18">
+                        <label for="theme18">Plesn</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="theme19" name="theme" value="19">
+                        <label for="theme19">Tigi cookies</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="theme20" name="theme" value="20">
+                        <label for="theme20">???</label>
+                    </div>
                 </div>
                 <button class="saveRoomSettingsBtn">Zapisz</button>
                 <button class="deleteRoomBtn">Usuń czat</button>
             </div>
-            <div class="chatMembers">
+            <div class="chatMembers content">
+                <header>
+                    <span>Członkowie</span>
+                    <button class="material-symbols-outlined closeModal">close</button>
+                </header>
+                <button class="addMemberBtn">Dodaj użytkownika</button>
+                <div class="membersList">
+                    <div class="member">
+                        <div class="profilPicture">
+                            <span class="material-symbols-outlined">person</span>
+                        </div>
+                        <div class="memberInfo">
+                            <span class="memberName">Leo</span>
+                            <span class="memberRole">Członek</span>
+                        </div>
+                        <div class="memberActions">
+                            <span class="material-symbols-outlined more">
+                                more_horiz
+                            </span>
+                            <div class="dropdown">
+                                <div class="dropdownEl">
+                                    <span>Awansuj</span>
+                                    <span class="material-symbols-outlined">
+                                        add_moderator
+                                    </span>
+                                </div>
+                                <div class="dropdownEl">
+                                    <span>Usuń</span>
+                                    <span class="material-symbols-outlined">
+                                        person_remove
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="member">
+                        <div class="profilPicture">
+                            <span class="material-symbols-outlined">person</span>
+                        </div>
+                        <div class="memberInfo">
+                            <span class="memberName">Leo</span>
+                            <span class="memberRole">Członek</span>
+                        </div>
+                        <div class="memberActions">
+                            <span class="material-symbols-outlined more">
+                                more_horiz
+                            </span>
+                            <div class="dropdown">
+                                <div class="dropdownEl">
+                                    <span>Awansuj</span>
+                                    <span class="material-symbols-outlined">
+                                        add_moderator
+                                    </span>
+                                </div>
+                                <div class="dropdownEl">
+                                    <span>Usuń</span>
+                                    <span class="material-symbols-outlined">
+                                        person_remove
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="saveMembers">Zapisz</button>
+
+                </div>
 
             </div>
         </div>

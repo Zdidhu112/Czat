@@ -1,4 +1,4 @@
-const formatMessage = require("../utils/messages");
+const {formatMessage, emitToUser} = require("../utils/messages");
 const { isValidId } = require("../utils/id-valid");
 const Message = require("./../db/models/message");
 const {
@@ -7,8 +7,8 @@ const {
     userLeave,
     getRoomUsers,
 } = require("../utils/users");
-const { getMessages, createMessage, replyMessage } = require("./../controller/messages");
-const { getRoomById, deleteRoom, updateSettings } = require("./../controller/rooms");
+const { getMessages, createMessage, replyMessage, toggleLike } = require("./../controller/messages");
+const { getRoomById, deleteRoom, updateSettings, updateLast } = require("./../controller/rooms");
 
 const botName = "Bocik";
 
@@ -39,7 +39,7 @@ module.exports = function (io) {
 
             socket.join(user.room);
             const messages = await getMessages(user.room);
-            socket.emit("roomInfo", {id: userId, roomData: room});
+            socket.emit("roomInfo", { id: userId, roomData: room });
             socket.emit("chatHistory", messages);
 
             socket.emit(
@@ -65,11 +65,26 @@ module.exports = function (io) {
             const user = getCurrentUser(socket.id);
             if (!user) return;
             const message = await createMessage(userId, user.username, user.room, msg);
+            const room = await updateLast(user.room, msg);
             if (message) {
                 io.to(user.room).emit(
                     "message",
                     formatMessage(user.username, msg, userId, message._id)
                 );
+            }
+            if (room) {
+                room.members.forEach(member => {
+                    emitToUser(
+                        io,
+                        member.user,
+                        "roomsListUpdated",
+                        {
+                            roomId: room._id,
+                            lastMessage: msg,
+                            updatedAt: room.updatedAt
+                        }
+                    );
+                });
             }
         });
         socket.on("reply", async ({ msgId, roomId }) => {
@@ -83,20 +98,31 @@ module.exports = function (io) {
         })
         socket.on("deleteRoom", async (roomId) => {
             console.log(roomId)
-            const room =  await deleteRoom(roomId, userId);
-            if(room) {
+            const room = await deleteRoom(roomId, userId);
+            if (room) {
                 io.to(roomId).emit("roomDeleted");
-    
+
                 io.in(roomId).socketsLeave(roomId);
             }
         })
-        socket.on("changeSettings", async ({roomId, data}) =>{
+        socket.on("changeSettings", async ({ roomId, data }) => {
             console.log(data);
             const room = await updateSettings(roomId, userId, data);
             console.log(room);
-            
-            if(room) {
-                socket.to(roomId).emit("roomUpdate", room);
+
+            if (room) {
+                io.to(roomId).emit("roomUpdate", room);
+            }
+        })
+        socket.on("like", async (messageId)=>{
+            const message = await toggleLike(messageId, userId);
+            console.log(message);
+
+            if(message) {
+                io.to(message.room.toString()).emit("msgReaction", {
+                    messageId,
+                    likes: message.likes
+                })
             }
         })
         socket.on("disconnect", () => {

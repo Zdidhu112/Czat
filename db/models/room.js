@@ -30,12 +30,18 @@ const roomSchema = new mongoose.Schema({
          type: String,
          enum: ["owner", "admin", "member"],
          default: "member"
+      },
+      unread: {
+         type: Boolean,
+         default: false
       }
    }],
-   createdAt: {
-      type: Date,
-      default: Date.now
+   lastMessage: {
+      type: String,
+      default: ""
    }
+}, {
+   timestamps: true
 })
 
 module.exports = mongoose.model('Room', roomSchema);
