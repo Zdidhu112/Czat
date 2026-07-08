@@ -41,9 +41,16 @@ const openMsgSearch = document.querySelector('#openMsgSearch');
 const addMemberBtn = document.querySelector('.addMemberBtn');
 const openMembersBtn = document.querySelector('#openMembersBtn');
 const chatMembers = document.querySelector('.chatMembers');
+const membersList = document.querySelector('.membersList');
+
+const addMembersModal = document.querySelector(".addMembers");
+const membersToAddList = document.querySelector("#membersToAddList");
+const memberSearchInput = document.querySelector("#memberSearchInput");
+const addMembersSendBtn = document.querySelector("#addMembersBtn");
 const { room } = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
+let users = [];
 const themeMap = [
     "light",
     "dark",
@@ -60,11 +67,11 @@ const themeMap = [
     "rose",
     "orange",
     "emerald",
-     "leo",
+    "leo",
     "banan",
     "plesn",
     "tigiCookie",
-    "mystery"    
+    "mystery"
 ];
 const themes = {
     light: ["#FFFFFF", "#0866FF", "rgba(226,229,233,.5)", "#000000", "#ffffff"],
@@ -174,7 +181,7 @@ function renderMessage(message) {
     author.textContent = message.username;
 
     const time = document.createElement("span");
-    time.textContent = message.time || "";
+    time.textContent = message.createdAt ? formatTime(message.createdAt) : "";
 
     info.appendChild(author);
     info.appendChild(time);
@@ -298,7 +305,7 @@ async function loadRooms() {
     }
 }
 async function loadUsers() {
-    const users = await fetch("/rooms/api/users")
+    users = await fetch("/rooms/api/users")
         .then(res => res.json());
     users.forEach(user => {
         const label = document.createElement("label");
@@ -540,12 +547,12 @@ socket.on("roomUpdate", (r) => {
     roomName2.textContent = roomData.name;
     changeChatName.value = roomData.name;
     const li = document.querySelector(
-        `.el[data-id="${room._id}"]`
+        `.el[data-id="${roomData._id}"]`
     );
-    li.querySelector(".chatName").textContent = room.name;
+    li.querySelector(".chatName").textContent = roomData.name;
 
-    if (room.theme) {
-        selectTheme(room.theme);
+    if (roomData.theme) {
+        selectTheme(roomData.theme);
     }
 })
 socket.on("roomsListUpdated", (r) => {
@@ -622,7 +629,177 @@ openMsgSearch.addEventListener("click", (e) => {
     }
 })
 
-openMembersBtn.addEventListener("click", (e)=>{
-     closeOtherModals(chatMembers);
+openMembersBtn.addEventListener("click", (e) => {
+    closeOtherModals(chatMembers);
+    renderMembers();
     modalBox.style.display = "flex";
 })
+function renderMembers() {
+    const members = roomData.members;
+    membersList.innerHTML = "";
+    members.forEach(member => {
+        let role;
+        switch (member.role) {
+            case "admin":
+                role = "Administrator"
+                break;
+            case "owner":
+                role = "Właściciel"
+                break;
+            default:
+                role = "Członek"
+                break;
+        }
+        membersList.insertAdjacentHTML("afterbegin",
+            ` <div class="member" data-id="${member.user._id}">
+                        <div class="profilPicture">
+                            <span class="material-symbols-outlined">person</span>
+                        </div>
+                        <div class="memberInfo">
+                            <span class="memberName">${member.user.name}</span>
+                            <span class="memberRole">${role}</span>
+                        </div>
+                        <div class="memberActions">
+                            <span class="material-symbols-outlined more">
+                                more_horiz
+                            </span>
+                            <div class="dropdown">
+                                <div class="dropdownEl promote">
+                                    <span>Awansuj</span>
+                                    <span class="material-symbols-outlined">
+                                        add_moderator
+                                    </span>
+                                </div>
+                                <div class="dropdownEl remove">
+                                    <span>Usuń</span>
+                                    <span class="material-symbols-outlined">
+                                        person_remove
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`
+
+        );
+    })
+}
+membersList.addEventListener("click", (e) => {
+    const dropdownEl = e.target.closest(".dropdownEl");
+    if (dropdownEl) {
+        const id = dropdownEl.closest(".member").dataset.id;
+        console.log(id);
+
+        if (dropdownEl.classList.contains("remove")) {
+            socket.emit("removeMember", { roomId, memberId: id });
+        } else if (dropdownEl.classList.contains("promote")) {
+            socket.emit("promoteMember", { roomId, memberId: id });
+
+            console.log("Awansuj", id);
+
+        }
+    }
+})
+socket.on("membersUpdated", (members) => {
+    if (members) {
+        roomData.members = members;
+        renderMembers();
+    }
+})
+socket.on("removedFromRoom", ({ id }) => {
+    removeRoomFromList(id)
+    if (id.toString() !== roomId.toString()) return;
+    alert("Zostałeś usunięty z tego czatu.");
+    window.location.href = "/chat";
+
+});
+socket.on("addedToRoom", ({ room }) => {
+    rooms.push(room);
+    addRoomToList(room);
+});
+addMemberBtn.addEventListener("click", (e) => {
+    closeOtherModals(addMembersModal);
+    createMembersList();
+})
+function createMembersList() {
+
+    membersToAddList.innerHTML = "";
+
+    users.forEach(user => {
+
+        const exists = roomData.members.some(
+            member => member.user._id === user._id
+        );
+
+        if (exists) return;
+
+        const label = document.createElement("label");
+
+        label.innerHTML = `
+            <input type="checkbox" value="${user._id}">
+            <span>${user.name}</span>
+        `;
+
+        membersToAddList.append(label);
+
+    });
+
+}
+memberSearchInput.addEventListener("input", (e) => {
+    roomSearch(memberSearchInput, membersToAddList, "span");
+});
+addMembersSendBtn.addEventListener("click", (e) => {
+    const members = [
+        ...membersToAddList.querySelectorAll("input:checked")
+    ].map(el => el.value);
+
+    if (!members.length)
+        return;
+
+    socket.emit("addMembers", {
+        roomId,
+        members
+    });
+
+    modalBox.style.display = "none";
+});
+function addRoomToList(room) {
+    const li = document.createElement("li");
+    li.className = "el";
+    li.dataset.id = room._id;
+
+    const icon = document.createElement("div");
+    icon.className = "icon";
+    const iconSpan = document.createElement("span");
+    iconSpan.classList.add("material-symbols-outlined");
+    iconSpan.textContent = room.type === "private" ? "face" : "group";
+    icon.appendChild(iconSpan);
+
+    const info = document.createElement("div");
+    info.className = "info";
+    const name = document.createElement("div");
+    name.className = "chatName";
+    name.textContent = room.name;
+    const last = document.createElement("div");
+    last.className = "lastMessage";
+    last.textContent = room.lastMessage || "Nowy pokój";
+    info.append(name, last);
+
+    const time = document.createElement("div");
+    time.className = "time";
+    time.textContent = room.updatedAt ? formatTime(room.updatedAt) : "12:50";
+
+    li.append(icon, info, time);
+
+    if (room.type === 'public') {
+        chatListPublic.appendChild(li);
+    } else {
+        chatListPrivate.appendChild(li);
+    }
+    li.addEventListener("click", () => {
+        window.location.href = "/chat?room=" + room._id;
+    });
+}
+function removeRoomFromList(id) {
+    const room = document.querySelector(`.chatList li.el[data-id="${id}"]`);
+    room.remove();
+}

@@ -67,7 +67,7 @@
             <header>
                 <div class="chatNameBox">
                     <div class="icon"><span class="material-symbols-outlined">face</span></div>
-                    <div class="chatName"></div>
+                    <div class="chatName">Wybierz czat</div>
                 </div>
 
                 <div class="chatActions">
@@ -223,7 +223,7 @@
                     <span class="material-symbols-outlined">face</span>
                 </div>
 
-                <div class="chatName">Pies Wison</div>
+                <div class="chatName">Wybierz czat</div>
 
                 <div class="chatBtns">
                     <div class="el" id="openMsgSearch">
@@ -409,6 +409,7 @@
                 <button class="saveRoomSettingsBtn">Zapisz</button>
                 <button class="deleteRoomBtn">Usuń czat</button>
             </div>
+
             <div class="chatMembers content">
                 <header>
                     <span>Członkowie</span>
@@ -416,66 +417,27 @@
                 </header>
                 <button class="addMemberBtn">Dodaj użytkownika</button>
                 <div class="membersList">
-                    <div class="member">
-                        <div class="profilPicture">
-                            <span class="material-symbols-outlined">person</span>
-                        </div>
-                        <div class="memberInfo">
-                            <span class="memberName">Leo</span>
-                            <span class="memberRole">Członek</span>
-                        </div>
-                        <div class="memberActions">
-                            <span class="material-symbols-outlined more">
-                                more_horiz
-                            </span>
-                            <div class="dropdown">
-                                <div class="dropdownEl">
-                                    <span>Awansuj</span>
-                                    <span class="material-symbols-outlined">
-                                        add_moderator
-                                    </span>
-                                </div>
-                                <div class="dropdownEl">
-                                    <span>Usuń</span>
-                                    <span class="material-symbols-outlined">
-                                        person_remove
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="member">
-                        <div class="profilPicture">
-                            <span class="material-symbols-outlined">person</span>
-                        </div>
-                        <div class="memberInfo">
-                            <span class="memberName">Leo</span>
-                            <span class="memberRole">Członek</span>
-                        </div>
-                        <div class="memberActions">
-                            <span class="material-symbols-outlined more">
-                                more_horiz
-                            </span>
-                            <div class="dropdown">
-                                <div class="dropdownEl">
-                                    <span>Awansuj</span>
-                                    <span class="material-symbols-outlined">
-                                        add_moderator
-                                    </span>
-                                </div>
-                                <div class="dropdownEl">
-                                    <span>Usuń</span>
-                                    <span class="material-symbols-outlined">
-                                        person_remove
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="saveMembers">Zapisz</button>
+                </div>
+            </div>
+
+            <div class="addMembers content">
+                <header>
+                    <span>Dodaj członków</span>
+                    <button class="material-symbols-outlined closeModal">close</button>
+                </header>
+
+                <div class="inputDiv">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" id="memberSearchInput" placeholder="Wyszukaj użytkownika">
+                </div>
+
+                <div class="modalList" id="membersToAddList">
 
                 </div>
 
+                <button class="modalSendBtn" id="addMembersBtn">
+                    Dodaj
+                </button>
             </div>
         </div>
     </div>

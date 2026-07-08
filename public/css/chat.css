@@ -966,6 +966,10 @@ button:is(.modalSendBtn, .saveRoomSettingsBtn , .addMemberBtn, .saveMembers):hov
     display: flex;
     flex-direction: column;
     gap: 4px;
+    /* max-height: 420px; */
+    /* overflow-y: auto;
+    overflow-x: visible; */
+    /* scrollbar-gutter: stable; */
 }
 .member {
     display: flex;
@@ -1009,6 +1013,7 @@ button:is(.modalSendBtn, .saveRoomSettingsBtn , .addMemberBtn, .saveMembers):hov
   min-width: 130px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   border-radius: 8px;
+  z-index: 3;
 }
 .memberActions:hover .dropdown {
   display: block;

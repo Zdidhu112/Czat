@@ -1,4 +1,4 @@
-const {formatMessage, emitToUser} = require("../utils/messages");
+const { formatMessage, emitToUser } = require("../utils/messages");
 const { isValidId } = require("../utils/id-valid");
 const Message = require("./../db/models/message");
 const {
@@ -8,7 +8,7 @@ const {
     getRoomUsers,
 } = require("../utils/users");
 const { getMessages, createMessage, replyMessage, toggleLike } = require("./../controller/messages");
-const { getRoomById, deleteRoom, updateSettings, updateLast } = require("./../controller/rooms");
+const { getRoomById, deleteRoom, updateSettings, updateLast, removeMember, promoteMember, addMembers } = require("./../controller/rooms");
 
 const botName = "Bocik";
 
@@ -114,14 +114,52 @@ module.exports = function (io) {
                 io.to(roomId).emit("roomUpdate", room);
             }
         })
-        socket.on("like", async (messageId)=>{
+        socket.on("like", async (messageId) => {
             const message = await toggleLike(messageId, userId);
             console.log(message);
 
-            if(message) {
+            if (message) {
                 io.to(message.room.toString()).emit("msgReaction", {
                     messageId,
                     likes: message.likes
+                })
+            }
+        })
+        socket.on("removeMember", async ({ roomId, memberId }) => {
+            const members = await removeMember(roomId, userId, memberId);
+            if (members) {
+                console.log("Usunięto: ", memberId)
+                io.to(roomId).emit("membersUpdated", members)
+                emitToUser(
+                    io,
+                    memberId,
+                    "removedFromRoom",
+                    {
+                        id: roomId
+                    }
+                );
+            }
+        })
+        socket.on("promoteMember", async ({ roomId, memberId }) => {
+            const members = await promoteMember(roomId, userId, memberId);
+            if (members) {
+                io.to(roomId).emit("membersUpdated", members)
+            }
+        })
+        socket.on("addMembers", async ({roomId, members}) =>{
+            const room = await addMembers(roomId, userId, members);
+            if(room) {
+                io.to(roomId).emit("membersUpdated", room.members)
+                members.forEach(member => {
+                    emitToUser(
+                        io,
+                        member,
+                        "addedToRoom",
+                        {
+                            room
+                        }
+                    );
+
                 })
             }
         })
