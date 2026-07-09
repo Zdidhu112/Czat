@@ -1,4 +1,4 @@
-function formatMessage(username, text, user, _id) {
+function formatMessage(username, text, user = 0, _id = 0) {
     return {
         username,
         text,

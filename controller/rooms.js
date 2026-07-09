@@ -175,6 +175,34 @@ const promoteMember = async (roomId, userId, memberId) => {
     console.log(error);
   }
 }
+const demoteMember = async (roomId, userId, memberId) => {
+  try {
+    const room = await Room.findById(roomId);
+    if (!room) return null;
+
+    if (!room.owner.equals(userId)) return null;
+    const member = room.members.find(el => {
+      return el.user.equals(memberId);
+    })
+    if (!member) return null;
+    if (room.owner.equals(memberId)) return null;
+    if (member.role !=="admin") return null;
+
+    room.members = room.members.map(el => {
+      if (el.user.equals(memberId)) {
+        el.role = "member";
+      }
+      return el;
+    });
+
+    await room.save();
+    const updated = await Room.findById(roomId)
+      .populate("members.user", "name");
+    return updated.members;
+  } catch (error) {
+    console.log(error);
+  }
+}
 const addMembers = async (roomId, userId, members) => {
   try {
     const room = await Room.findById(roomId);
@@ -217,5 +245,6 @@ module.exports = {
   updateLast,
   removeMember,
   promoteMember,
-  addMembers
+  addMembers,
+  demoteMember
 }

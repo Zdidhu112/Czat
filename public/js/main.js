@@ -681,13 +681,19 @@ function renderMembers() {
                                 more_horiz
                             </span>
                             <div class="dropdown">
-                                <div class="dropdownEl promote">
+                                <div class="dropdownEl promote" ${member.role === "member" ? "" : 'style="display: none;"' }>
                                     <span>Awansuj</span>
                                     <span class="material-symbols-outlined">
                                         add_moderator
                                     </span>
                                 </div>
-                                <div class="dropdownEl remove">
+                                <div class="dropdownEl demote" ${member.role === "admin" ? "" :'style="display: none;"' }>
+                                    <span>Degraduj</span>
+                                    <span class="material-symbols-outlined">
+                                        remove_moderator
+                                    </span>
+                                </div>
+                                <div class="dropdownEl remove" ${member.role != "owner" ? "" :'style="display: none;"' }>
                                     <span>Usuń</span>
                                     <span class="material-symbols-outlined">
                                         person_remove
@@ -712,6 +718,11 @@ membersList.addEventListener("click", (e) => {
             socket.emit("promoteMember", { roomId, memberId: id });
 
             console.log("Awansuj", id);
+
+        } else if (dropdownEl.classList.contains("demote")) {
+            socket.emit("demoteMember", { roomId, memberId: id });
+
+            console.log("Degraduj", id);
 
         }
     }
@@ -855,8 +866,8 @@ socket.on("olderMessages", messages => {
     const previousHeight = chatMessages.scrollHeight;
 
 
-    // const newHeight = chatMessages.scrollHeight;
+    const newHeight = chatMessages.scrollHeight;
 
-    // chatMessages.scrollTop += newHeight - previousHeight;
+    chatMessages.scrollTop += newHeight - previousHeight;
 
 });

@@ -8,7 +8,7 @@ const {
     getRoomUsers,
 } = require("../utils/users");
 const { getMessages, createMessage, replyMessage, toggleLike } = require("./../controller/messages");
-const { getRoomById, deleteRoom, updateSettings, updateLast, removeMember, promoteMember, addMembers } = require("./../controller/rooms");
+const { getRoomById, deleteRoom, updateSettings, updateLast, removeMember, promoteMember, addMembers, demoteMember } = require("./../controller/rooms");
 
 const botName = "Bocik";
 
@@ -20,7 +20,8 @@ module.exports = function (io) {
         const username = socketUser.name;
         socket.on("joinRoom", async (roomId) => {
             if (!isValidId(roomId)) return;
-            const user = userJoin(socket.id, username, roomId);
+
+            const user = userJoin(socket.id, username, roomId, userId);
             const room = await getRoomById(roomId);
 
             if (!room)
@@ -57,7 +58,7 @@ module.exports = function (io) {
                 .to(user.room)
                 .emit(
                     "message",
-                    formatMessage(botName, `${user.username} joined`, 0, 0)
+                    formatMessage(botName, `${user.username} dołączył.`)
                 );
         });
         socket.on("loadOlderMessages", async ({ roomId, before }) => {
@@ -75,7 +76,7 @@ module.exports = function (io) {
             if (message) {
                 io.to(user.room).emit(
                     "message",
-                    formatMessage(user.username, msg, userId, message._id)
+                    message
                 );
             }
             if (room) {
@@ -160,6 +161,12 @@ module.exports = function (io) {
                 io.to(roomId).emit("membersUpdated", members)
             }
         })
+        socket.on("demoteMember", async ({ roomId, memberId }) => {
+            const members = await demoteMember(roomId, userId, memberId);
+            if (members) {
+                io.to(roomId).emit("membersUpdated", members)
+            }
+        })
         socket.on("addMembers", async ({ roomId, members }) => {
             const room = await addMembers(roomId, userId, members);
             if (room) {
@@ -183,7 +190,7 @@ module.exports = function (io) {
             if (user) {
                 io.to(user.room).emit(
                     "message",
-                    formatMessage(botName, `${user.username} left`, 0, 0)
+                    formatMessage(botName, `${user.username} opuścił czat`)
                 );
 
                 io.to(user.room).emit("roomUsers", {
