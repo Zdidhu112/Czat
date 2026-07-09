@@ -2,14 +2,22 @@ const moment = require('moment');
 
 const Message = require('./../db/models/message');
 
-const getMessages = async (room) => {
+const getMessages = async (room, before = null, limit = 10) => {
     try {
-        return await Message
-            .find({ room })
-            .sort({ createdAt: 1 })
-            .limit(50);
+        const query = { room };
+
+        if (before) {
+            query.createdAt = { $lt: before };
+        }
+
+        const messages = await Message.find(query)
+             .sort({ createdAt: -1 })
+           .limit(limit);
+
+        return messages;
+
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
 };
 const createMessage = async (user, username, room, text) => {

@@ -6,8 +6,11 @@ const User = require('./db/models/users');
 
 function initialize(passport, getUserByEmail, getUserById) {
   const authenticateUser = async (email, password, done) => {
+    if(!email || !password) {
+      return done(null, false, { message: 'Wypełnij pola' })
+    }
     const user = await getUserByEmail(email);
-    if (user == null) {
+    if (user === null) {
       return done(null, false, { message: 'No user with that email' })
     }
 

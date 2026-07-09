@@ -89,7 +89,9 @@ const updateSettings = async (roomId, userId, data) => {
     }
     Object.assign(room, data);
     await room.save();
-    return room;
+    const updated = await Room.findById(roomId)
+      .populate("members.user", "name");
+    return updated.members;
   } catch (error) {
     console.log(error);
     return null;
@@ -97,7 +99,7 @@ const updateSettings = async (roomId, userId, data) => {
 }
 const updateLast = async (roomId, text) => {
   try {
-    const room = await Room.findByIdAndUpdate(roomId, { lastMessage: text, updatedAt: Date.now() }, {returnDocument: 'after'});
+    const room = await Room.findByIdAndUpdate(roomId, { lastMessage: text, updatedAt: Date.now() }, { returnDocument: 'after' });
 
     return room;
   } catch (error) {
@@ -135,7 +137,7 @@ const removeMember = async (roomId, userId, memberId) => {
 
     await room.save();
     const updated = await Room.findById(roomId)
-            .populate("members.user", "name");
+      .populate("members.user", "name");
     return updated.members;
   } catch (error) {
     console.log(error);
@@ -167,7 +169,7 @@ const promoteMember = async (roomId, userId, memberId) => {
 
     await room.save();
     const updated = await Room.findById(roomId)
-            .populate("members.user", "name");
+      .populate("members.user", "name");
     return updated.members;
   } catch (error) {
     console.log(error);
@@ -199,8 +201,8 @@ const addMembers = async (roomId, userId, members) => {
 
     });
     await room.save();
-   const updated = await Room.findById(roomId)
-            .populate("members.user", "name");
+    const updated = await Room.findById(roomId)
+      .populate("members.user", "name");
     return updated;
   } catch (error) {
     console.log(error);

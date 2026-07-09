@@ -60,7 +60,13 @@ module.exports = function (io) {
                     formatMessage(botName, `${user.username} joined`, 0, 0)
                 );
         });
+        socket.on("loadOlderMessages", async ({ roomId, before }) => {
 
+            const messages = await getMessages(roomId, before);
+
+            socket.emit("olderMessages", messages);
+
+        });
         socket.on("chatMessage", async (msg) => {
             const user = getCurrentUser(socket.id);
             if (!user) return;

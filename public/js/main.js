@@ -98,7 +98,9 @@ const themes = {
     tigiCookie: ["#ffe4b4", "#8b7351", "rgb(173 119 59 / 85%)", "#623c00", "#2e1700"],
     mystery: ["#d9f0ff", "#c3c8ff", "rgb(239 253 255 / 85%)", "#8d90ff", "#7893d0"]
 };
-
+let loadingMessages = false;
+let hasMoreMessages = true;
+let oldestMessageDate = null;
 const roomId = room;
 let roomData;
 let rooms = [];
@@ -144,8 +146,12 @@ socket.on("roomUsers", ({ users }) => {
 
 socket.on("chatHistory", messages => {
     chatMessages.innerHTML = "";
-    messages.forEach(renderMessage);
+    messages.reverse().forEach(renderMessage);
     scrollToBottom();
+    if (messages.length) {
+        oldestMessageDate = messages[0].createdAt;
+    }
+    hasMoreMessages = messages.length === 10;
 });
 
 socket.on("message", message => {
@@ -156,20 +162,19 @@ socket.on("message", message => {
 chatInput.addEventListener("keypress", (e) => {
     if (e.key !== "Enter") return;
     sendMsg();
-   
+
 });
-sendMsgBtn.addEventListener("click", (e)=>{
+sendMsgBtn.addEventListener("click", (e) => {
     sendMsg();
 })
 function sendMsg() {
- const text = chatInput.value.trim();
+    const text = chatInput.value.trim();
     if (!text) return;
 
     socket.emit("chatMessage", text);
     chatInput.value = "";
 }
-
-function renderMessage(message) {
+function createMessage(message) {
     const wrapper = document.createElement("div");
     wrapper.classList.add("message");
     if (message._id) {
@@ -238,8 +243,13 @@ function renderMessage(message) {
     wrapper.appendChild(info);
     wrapper.appendChild(box);
     wrapper.appendChild(reactionsBox);
-
-    chatMessages.appendChild(wrapper);
+    return wrapper;
+}
+function renderMessage(message) {
+    chatMessages.appendChild(createMessage(message));
+}
+function prependMessage(message) {
+    chatMessages.prepend(createMessage(message));
 }
 
 function renderUsers(users) {
@@ -810,3 +820,43 @@ function removeRoomFromList(id) {
     const room = document.querySelector(`.chatList li.el[data-id="${id}"]`);
     room.remove();
 }
+chatMessages.addEventListener("scroll", () => {
+
+    if (loadingMessages) return;
+    if (!hasMoreMessages) return;
+
+    if (chatMessages.scrollTop <= 50) {
+
+        loadingMessages = true;
+
+        socket.emit("loadOlderMessages", {
+            roomId,
+            before: oldestMessageDate
+        });
+
+    }
+
+});
+socket.on("olderMessages", messages => {
+
+
+    loadingMessages = false;
+
+    if (!messages.length) {
+        hasMoreMessages = false;
+        return;
+    }
+
+    oldestMessageDate = messages[messages.length - 1].createdAt;
+
+    messages.forEach(prependMessage);
+
+
+    const previousHeight = chatMessages.scrollHeight;
+
+
+    // const newHeight = chatMessages.scrollHeight;
+
+    // chatMessages.scrollTop += newHeight - previousHeight;
+
+});

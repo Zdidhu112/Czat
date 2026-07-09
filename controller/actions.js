@@ -23,6 +23,7 @@ const findUsersAll = async()=>{
 const findUserByEmail= async(email)=>{
   try {
     const user = await User.findOne({ email: email }).exec();
+    if(!user) return null;
     return user;
   } catch (error) {
     console.log(error);
