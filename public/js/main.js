@@ -47,6 +47,7 @@ const addMembersModal = document.querySelector(".addMembers");
 const membersToAddList = document.querySelector("#membersToAddList");
 const memberSearchInput = document.querySelector("#memberSearchInput");
 const addMembersSendBtn = document.querySelector("#addMembersBtn");
+const sendMsgBtn = document.querySelector("#sendMsgBtn");
 const { room } = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
@@ -154,13 +155,19 @@ socket.on("message", message => {
 
 chatInput.addEventListener("keypress", (e) => {
     if (e.key !== "Enter") return;
-
-    const text = chatInput.value.trim();
+    sendMsg();
+   
+});
+sendMsgBtn.addEventListener("click", (e)=>{
+    sendMsg();
+})
+function sendMsg() {
+ const text = chatInput.value.trim();
     if (!text) return;
 
     socket.emit("chatMessage", text);
     chatInput.value = "";
-});
+}
 
 function renderMessage(message) {
     const wrapper = document.createElement("div");

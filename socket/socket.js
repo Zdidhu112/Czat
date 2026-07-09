@@ -73,18 +73,26 @@ module.exports = function (io) {
                 );
             }
             if (room) {
-                room.members.forEach(member => {
-                    emitToUser(
-                        io,
-                        member.user,
-                        "roomsListUpdated",
-                        {
-                            roomId: room._id,
-                            lastMessage: msg,
-                            updatedAt: room.updatedAt
-                        }
-                    );
-                });
+                if (room.type === "private") {
+                    room.members.forEach(member => {
+                        emitToUser(
+                            io,
+                            member.user,
+                            "roomsListUpdated",
+                            {
+                                roomId: room._id,
+                                lastMessage: msg,
+                                updatedAt: room.updatedAt
+                            }
+                        );
+                    });
+                } else {
+                    io.emit("roomsListUpdated", {
+                        roomId: room._id,
+                        lastMessage: msg,
+                        updatedAt: room.updatedAt
+                    })
+                }
             }
         });
         socket.on("reply", async ({ msgId, roomId }) => {
@@ -146,9 +154,9 @@ module.exports = function (io) {
                 io.to(roomId).emit("membersUpdated", members)
             }
         })
-        socket.on("addMembers", async ({roomId, members}) =>{
+        socket.on("addMembers", async ({ roomId, members }) => {
             const room = await addMembers(roomId, userId, members);
-            if(room) {
+            if (room) {
                 io.to(roomId).emit("membersUpdated", room.members)
                 members.forEach(member => {
                     emitToUser(
