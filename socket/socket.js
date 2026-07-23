@@ -104,11 +104,38 @@ module.exports = function (io) {
         });
         socket.on("reply", async ({ msgId, roomId }) => {
             const replicatedMsg = await replyMessage(roomId, msgId, userId, username);
+            const text = replicatedMsg.text;
+            let room;
+            if (text) {
+                room = await updateLast(roomId, text);
+            }
             if (replicatedMsg) {
                 io.to(roomId).emit(
                     "message",
                     formatMessage(username, replicatedMsg.text, userId, msgId)
                 );
+            }
+            if (room) {
+                if (room.type === "private") {
+                    room.members.forEach(member => {
+                        emitToUser(
+                            io,
+                            member.user,
+                            "roomsListUpdated",
+                            {
+                                roomId: room._id,
+                                lastMessage: text,
+                                updatedAt: room.updatedAt
+                            }
+                        );
+                    });
+                } else {
+                    io.emit("roomsListUpdated", {
+                        roomId: room._id,
+                        lastMessage: msg,
+                        updatedAt: room.updatedAt
+                    })
+                }
             }
         })
         socket.on("deleteRoom", async (roomId) => {
